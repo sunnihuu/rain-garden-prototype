@@ -40,6 +40,75 @@ document.addEventListener("DOMContentLoaded", () => {
 	map.once("load", () => {
 		// Ensure the map fills the viewport in case initial layout was off.
 		map.resize();
+
+		// Load GI surface distribution Shapefile (Queens) and add as GeoJSON layer
+		const shpPath = "data/processed/gi-surface-distribution/gi-surface-queens.shp";
+		if (!window.shp) {
+			console.error("shpjs is not loaded; cannot read Shapefile. Check the CDN tag.");
+			return;
+		}
+
+		shp(shpPath)
+			.then((geojson) => {
+				if (!geojson || !geojson.features || geojson.features.length === 0) {
+					console.warn("GI surface distribution returned empty GeoJSON.");
+					return;
+				}
+
+				// Compute bounds to fit the layer
+				const bounds = new mapboxgl.LngLatBounds();
+				for (const f of geojson.features) {
+					const geom = f.geometry;
+					if (!geom) continue;
+					const type = geom.type;
+					const coords = geom.coordinates;
+					const addCoord = (c) => bounds.extend(c);
+					const walk = (arr) => {
+						if (!arr) return;
+						if (typeof arr[0] === "number") addCoord(arr);
+						else arr.forEach(walk);
+					};
+					walk(coords);
+				}
+
+				if (!map.getSource("gi-surface-distribution")) {
+					map.addSource("gi-surface-distribution", { type: "geojson", data: geojson });
+				}
+
+				// Fill layer
+				if (!map.getLayer("gi-surface-fill")) {
+					map.addLayer({
+						id: "gi-surface-fill",
+						type: "fill",
+						source: "gi-surface-distribution",
+						paint: {
+							"fill-color": "#2ecc71",
+							"fill-opacity": 0.35
+						}
+					});
+				}
+
+				// Outline layer
+				if (!map.getLayer("gi-surface-outline")) {
+					map.addLayer({
+						id: "gi-surface-outline",
+						type: "line",
+						source: "gi-surface-distribution",
+						paint: {
+							"line-color": "#1f8e54",
+							"line-width": 1
+						}
+					});
+				}
+
+				// Fit to layer bounds with padding
+				if (bounds && bounds.isEmpty && !bounds.isEmpty()) {
+					map.fitBounds(bounds, { padding: 24, duration: 600 });
+				}
+			})
+			.catch((err) => {
+				console.error("Failed to load GI surface distribution Shapefile:", err);
+			});
 	});
 
 	// If the Mapbox style fails to load (e.g., auth/network), fall back to OSM raster.
