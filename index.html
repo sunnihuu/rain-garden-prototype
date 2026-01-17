@@ -116,7 +116,7 @@
               <input type="range" class="layer-opacity-slider" data-layer="slope-layer" min="0" max="100" value="100">
             </div>
           </li>
-          <li class="layer-item is-on" draggable="true" data-layer="sewer-layer">
+          <li class="layer-item" draggable="true" data-layer="sewer-layer">
             <span>Sewer System</span>
             <div class="layer-opacity-control">
               <input type="range" class="layer-opacity-slider" data-layer="sewer-layer" min="0" max="100" value="100">
@@ -417,7 +417,7 @@
               <input type="range" class="layer-opacity-slider-maintenance" data-layer="slope-layer" min="0" max="100" value="100">
             </div>
           </li>
-          <li class="layer-item is-on" draggable="true" data-layer="sewer-layer">
+          <li class="layer-item" draggable="true" data-layer="sewer-layer">
             <span>Sewer System</span>
             <div class="layer-opacity-control">
               <input type="range" class="layer-opacity-slider-maintenance" data-layer="sewer-layer" min="0" max="100" value="100">
@@ -550,6 +550,18 @@
     </section>
 
   </div>
+
+  <!-- Final: Data & Assumptions -->
+  <footer style="margin: 24px auto; max-width: 980px; padding: 16px 20px; border-top: 1px solid #e5e7eb;">
+    <h2 style="font-family: 'League Spartan', sans-serif; font-weight: 700; font-size: 18px; margin: 0 0 10px; color: #1f2937;">Data & Assumptions</h2>
+    <ul style="margin: 0; padding-left: 18px; line-height: 1.6; color: #374151; font-size: 14px;">
+      <li>Assets from gi-surface-queens-RG-2025-totals.geojson (Queens GI points only).</li>
+      <li>District lookups use NYC City Council and Community District boundaries.</li>
+      <li>Base capacity comes from 2025 gallons saved when provided; otherwise from infiltration rate × area, or a 6-inch ponding depth fallback.</li>
+      <li>Maintenance defaults: ≤1000 sq ft → ~3 hrs/mo; &gt;1000 sq ft → ~4 hrs/mo (unless data provides a value).</li>
+      <li>Performance loss: If maintenance is delayed, capacity drops -10% per week, clamped at 20% of base.</li>
+    </ul>
+  </footer>
 
   <script>
     // Landing page background

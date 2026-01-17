@@ -374,6 +374,18 @@ input[type="range"] {
   margin-top: 8px;
 }
 
+/* ----- Scroll helpers and layout refinements ----- */
+/* Maintenance Layers panel: ensure inner list scrolls */
+#layers-panel-maintenance { max-height: 60vh; overflow-y: auto; }
+#layerList-maintenance { max-height: calc(60vh - 80px); overflow-y: auto; }
+
+/* Legend panel: avoid overflow on small screens */
+.legend-panel { max-height: 40vh; overflow-y: auto; }
+
+/* Right panel content blocks: clamp long sections */
+#district-summary { max-height: 280px; overflow-y: auto; }
+#feature-info { max-height: 360px; overflow-y: auto; }
+
 .map-container-scenario {
   width: 100%;
   height: 100%;
