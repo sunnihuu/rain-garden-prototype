@@ -1025,6 +1025,7 @@
       });
 
       // Populate outfall type dropdown
+      const outfallTypeSelect = document.getElementById('outfallTypeSelect');
       fetch('data/processed/drainage points.geojson')
         .then(response => response.json())
         .then(data => {
@@ -1035,23 +1036,24 @@
             }
           });
           
-          const select = document.getElementById('outfallTypeSelect');
-          if (select) {
+          if (outfallTypeSelect) {
             Array.from(outfallTypes).sort().forEach(type => {
               const option = document.createElement('option');
               option.value = type;
               option.textContent = type;
-              select.appendChild(option);
+              outfallTypeSelect.appendChild(option);
             });
             
-            // Add change event listener
-            select.addEventListener('change', function() {
+            // Add change event listener - will be activated when maps are loaded
+            outfallTypeSelect.addEventListener('change', function() {
               const selectedType = this.value;
-              if (selectedType) {
-                map.setFilter('drainage-points', ['==', ['get', 'outfall_ty'], selectedType]);
-              } else {
-                map.setFilter('drainage-points', null);
+              const filter = selectedType ? ['==', ['get', 'outfall_ty'], selectedType] : null;
+              
+              // Apply filter to both maps if drainage-points layer exists
+              if (map && map.getLayer('drainage-points')) {
+                map.setFilter('drainage-points', filter);
               }
+              // Note: mapScenario filter will be handled in js/index.js when the simulator map loads
             });
           }
         })

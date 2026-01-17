@@ -785,6 +785,8 @@
             councilSelect.value = '';
             communitySelect.value = '';
             assetTypeSelect.value = '';
+            const outfallSelect = document.getElementById('outfallTypeSelect');
+            if (outfallSelect) outfallSelect.value = '';
             refreshSelectedLayer();
             updateSummary();
             updateDistrictSummary(null, null);
