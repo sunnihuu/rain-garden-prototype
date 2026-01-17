@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
   <link href="css/index.css" rel="stylesheet" />
+  <link href="css/district-panel.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -87,6 +88,12 @@
         </button>
       </div>
 
+      <!-- Info Panel Button (Upper Right) -->
+      <button class="info-panel-btn" id="toggle-info-panel">
+        <span class="btn-icon">ℹ️</span>
+        <span class="btn-text">Info</span>
+      </button>
+
       <!-- Layer Management Panel (Upper Left - Collapsible) -->
       <div class="control-panel" id="layers-panel">
         <div class="panel-title">Layers</div>
@@ -113,6 +120,24 @@
             <span>Terrain Slope</span>
             <div class="layer-opacity-control">
               <input type="range" class="layer-opacity-slider" data-layer="slope-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item is-on" draggable="true" data-layer="sewer-layer">
+            <span>Sewer System</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="sewer-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="drainage-lines">
+            <span>Sewer Drainage</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="drainage-lines" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="drainage-points">
+            <span>Drainage Points</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="drainage-points" min="0" max="100" value="100">
             </div>
           </li>
         </ul>
@@ -305,11 +330,123 @@
           </div>
         </div>
       </div>
+
+      <!-- Sewer System Modal -->
+      <div id="sewer-modal" class="layer-modal">
+        <h2 class="modal-title">Sewer System</h2>
+        <div class="modal-content">
+          <p>Shows the type of sewer infrastructure in each area.</p>
+          <div class="legend">
+            <div class="legend-label">System Type</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #2980b9;"></div>
+              <span>Combined</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #e67e22;"></div>
+              <span>Separat Combined</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #27ae60;"></div>
+              <span>Direct Drainage</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #8e44ad;"></div>
+              <span>Other</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #95a5a6;"></div>
+              <span>Unknown</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sewer Drainage Modal -->
+      <div id="drainage-lines-modal" class="layer-modal">
+        <h2 class="modal-title">Sewer Drainage Areas</h2>
+        <div class="modal-content">
+          <p>Combined sewer drainage catchment areas showing stormwater flow paths.</p>
+          <div class="legend">
+            <div class="legend-label">Drainage Area</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #ff6b6b; border: 1px solid #cc5555;"></div>
+              <span>Drainage Polygon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drainage Points Modal -->
+      <div id="drainage-points-modal" class="layer-modal">
+        <h2 class="modal-title">Drainage Points</h2>
+        <div class="modal-content">
+          <p>Outfall and treatment points for stormwater systems. Circle size varies with zoom level.</p>
+          <div class="legend">
+            <div class="legend-label">Point Type</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #4ecdc4; border-radius: 50%; width: 16px; height: 16px; border: 2px solid white;"></div>
+              <span>Drainage Point</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- Screen 3: Rain Garden Prototype Panel with Map -->
+    <!-- Screen 3: Maintenance Explorer with Layers and Info Panel -->
     <section class="screen" id="screen-scenario">
+      <!-- Layers Control Panel (Top Left) -->
+      <div class="control-panel maintenance-layers" id="layers-panel-maintenance">
+        <div class="panel-title">Layers</div>
+        <ul id="layerList-maintenance" class="layer-list">
+          <li class="layer-item is-on" draggable="true" data-layer="gi-surface-dots">
+            <span>GI Distribution</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="gi-surface-dots" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="gi-density-layer">
+            <span>Density Map</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="gi-density-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="soils-layer">
+            <span>Native Soils</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="soils-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="slope-layer">
+            <span>Terrain Slope</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="slope-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item is-on" draggable="true" data-layer="sewer-layer">
+            <span>Sewer System</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="sewer-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="drainage-lines">
+            <span>Sewer Drainage</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="drainage-lines" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="drainage-points">
+            <span>Drainage Points</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider-maintenance" data-layer="drainage-points" min="0" max="100" value="100">
+            </div>
+          </li>
+        </ul>
+      </div>
+
       <div id="map-scenario" class="map-container-scenario"></div>
+      
+      <!-- Right Side Info Panel -->
       <div id="panel-scenario" class="scenario-panel">
         <section class="block">
           <h2>Selection</h2>
@@ -345,6 +482,14 @@
           <small class="muted">
             effective_capacity = base_capacity_gal × (1 - 0.10 × weeks), min 20% of base.
           </small>
+        </section>
+
+        <!-- Feature Info Section -->
+        <section class="block">
+          <h2>Feature Details</h2>
+          <div id="feature-info" class="feature-info">
+            <p class="muted">Hover over features on the map to see details</p>
+          </div>
         </section>
       </div>
     </section>
@@ -631,6 +776,183 @@
         slopePopup.remove();
       });
 
+      // Add Combined/Separate Sewer layer
+      map.addSource('sewer', {
+        type: 'geojson',
+        data: 'data/processed/combined-sparate%20sewer.geojson'
+      });
+
+      map.addLayer({
+        id: 'sewer-layer',
+        type: 'fill',
+        source: 'sewer',
+        layout: { visibility: 'visible' },
+        paint: {
+          'fill-color': [
+            'match',
+            ['get', 'COMB_OR_SE'],
+            'COMBINED', '#2980b9',
+            'SEPARAT COMBINED', '#e67e22',
+            'DIRECT DRAINAGE', '#27ae60',
+            'OTHER', '#8e44ad',
+            'UNKNOWN', '#95a5a6',
+            '#95a5a6'
+          ],
+          'fill-opacity': 0.6
+        }
+      });
+
+      map.addLayer({
+        id: 'sewer-outline',
+        type: 'line',
+        source: 'sewer',
+        layout: { visibility: 'visible' },
+        paint: { 'line-color': '#ffffff', 'line-width': 0.8, 'line-opacity': 0.4 }
+      });
+
+      // Sewer layer hover interaction
+      const sewerPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
+      map.on('mousemove', 'sewer-layer', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const sewerType = e.features[0].properties.COMB_OR_SE || 'Unknown';
+        
+        const html = `
+          <div style="font-family: 'League Spartan', sans-serif; font-size: 14px; line-height: 1.6;">
+            <strong>Sewer System</strong><br>
+            <strong>${sewerType}</strong>
+          </div>
+        `;
+        
+        sewerPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      });
+
+      map.on('mouseleave', 'sewer-layer', () => {
+        map.getCanvas().style.cursor = '';
+        sewerPopup.remove();
+      });
+
+      // Add Combined Sewer Drainage layer
+      map.addSource('drainage-lines', {
+        type: 'geojson',
+        data: 'data/processed/combine-sewer-drainage.geojson'
+      });
+
+      map.addLayer({
+        id: 'drainage-lines',
+        type: 'fill',
+        source: 'drainage-lines',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': '#ff6b6b',
+          'fill-opacity': 0.4
+        }
+      });
+
+      map.addLayer({
+        id: 'drainage-lines-outline',
+        type: 'line',
+        source: 'drainage-lines',
+        layout: { visibility: 'none' },
+        paint: {
+          'line-color': '#cc5555',
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        }
+      });
+
+      // Drainage lines hover interaction
+      const drainageLinesPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
+      map.on('mousemove', 'drainage-lines', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const area = e.features[0].properties.area || 0;
+        const acreage = e.features[0].properties.acreage || 0;
+        const outfall = e.features[0].properties.outfall || 'Unknown';
+        
+        const html = `
+          <div style="font-family: 'League Spartan', sans-serif; font-size: 14px; line-height: 1.6;">
+            <strong>Sewer Drainage Area</strong><br>
+            <strong>Outfall:</strong> ${outfall}<br>
+            <strong>Area:</strong> ${area.toLocaleString()} sq ft<br>
+            <strong>Acreage:</strong> ${acreage.toFixed(2)} acres
+          </div>
+        `;
+        
+        drainageLinesPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      });
+
+      map.on('mouseleave', 'drainage-lines', () => {
+        map.getCanvas().style.cursor = '';
+        drainageLinesPopup.remove();
+      });
+
+      // Add Drainage Points layer
+      map.addSource('drainage-points', {
+        type: 'geojson',
+        data: 'data/processed/drainage points.geojson'
+      });
+
+      map.addLayer({
+        id: 'drainage-points',
+        type: 'circle',
+        source: 'drainage-points',
+        layout: { visibility: 'none' },
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10, 3,
+            15, 8
+          ],
+          'circle-color': '#4ecdc4',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-opacity': 0.8
+        }
+      });
+
+      // Drainage points hover interaction
+      const drainagePointsPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
+      map.on('mousemove', 'drainage-points', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const outfallType = e.features[0].properties.outfall_ty || 'Unknown';
+        const unitId = e.features[0].properties.unitid || 'N/A';
+        const ownership = e.features[0].properties.ownership || 'N/A';
+        const treatment = e.features[0].properties.treatment || 'N/A';
+        
+        const html = `
+          <div style="font-family: 'League Spartan', sans-serif; font-size: 14px; line-height: 1.6;">
+            <strong>Drainage Point</strong><br>
+            <strong>ID:</strong> ${unitId}<br>
+            <strong>Type:</strong> ${outfallType}<br>
+            <strong>Ownership:</strong> ${ownership}<br>
+            <strong>Treatment:</strong> ${treatment}
+          </div>
+        `;
+        
+        drainagePointsPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      });
+
+      map.on('mouseleave', 'drainage-points', () => {
+        map.getCanvas().style.cursor = '';
+        drainagePointsPopup.remove();
+      });
+
       // Layer management
       const list = document.getElementById('layerList');
 
@@ -662,6 +984,9 @@
         document.getElementById('density-modal').classList.toggle('active', activeLayers.includes('gi-density-layer'));
         document.getElementById('soils-modal').classList.toggle('active', activeLayers.includes('soils-layer'));
         document.getElementById('slope-modal').classList.toggle('active', activeLayers.includes('slope-layer'));
+        document.getElementById('drainage-lines-modal').classList.toggle('active', activeLayers.includes('drainage-lines'));
+        document.getElementById('drainage-points-modal').classList.toggle('active', activeLayers.includes('drainage-points'));
+        document.getElementById('sewer-modal')?.classList.toggle('active', activeLayers.includes('sewer-layer'));
         
         if (activeLayers.includes('gi-surface-dots')) {
           setTimeout(() => {
@@ -677,7 +1002,8 @@
           'gi-surface-dots': ['gi-surface-dots'],
           'gi-density-layer': ['gi-density-layer', 'gi-density-outline'],
           'soils-layer': ['soils-layer', 'soils-outline'],
-          'slope-layer': ['slope-layer', 'slope-outline']
+          'slope-layer': ['slope-layer', 'slope-outline'],
+          'sewer-layer': ['sewer-layer', 'sewer-outline']
         };
 
         for (const [dataset, layers] of Object.entries(layerMap)) {
@@ -1021,6 +1347,588 @@
         }
       });
     });
+
+    // ===== DISTRICT EXPLORER MAP (Screen 3) =====
+    const mapDistrict = new mapboxgl.Map({
+      container: 'map-district',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-73.83, 40.75],
+      zoom: 11.5,
+      accessToken: 'pk.eyJ1IjoibHVjYXNiZXJnbGlhdSIsImEiOiJjbTFibWdnYnQwMzh3MnFzYnM3cWRpN3VsIn0.bDIzJdhB7aTiDLBD5s-xMA'
+    });
+
+    mapDistrict.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    let selectedDistrict = null;
+    let districtLayersLoaded = false;
+
+    mapDistrict.on('load', function() {
+      if (districtLayersLoaded) return;
+      districtLayersLoaded = true;
+
+      // Add all layers from the main map
+      mapDistrict.addSource('gi-surface', {
+        type: 'geojson',
+        data: 'data/processed/gi-surface-queens.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'gi-surface-dots',
+        type: 'circle',
+        source: 'gi-surface',
+        layout: { visibility: 'visible' },
+        filter: ['in', ['get', 'asset_type'], ['literal', ['Rain Garden', 'ROWB', 'ROWGS', 'ROWRG', 'ROWSGS']]],
+        paint: {
+          'circle-radius': 4,
+          'circle-color': '#2ecc71',
+          'circle-stroke-width': 0.5,
+          'circle-stroke-color': '#27ae60',
+          'circle-opacity': 0.7
+        }
+      });
+
+      // Add sewer layer
+      mapDistrict.addSource('sewer', {
+        type: 'geojson',
+        data: 'data/processed/combined-sparate%20sewer.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'sewer-layer',
+        type: 'fill',
+        source: 'sewer',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': [
+            'match',
+            ['get', 'COMB_OR_SE'],
+            'COMBINED', '#2980b9',
+            'SEPARAT COMBINED', '#e67e22',
+            'DIRECT DRAINAGE', '#27ae60',
+            'OTHER', '#8e44ad',
+            'UNKNOWN', '#95a5a6',
+            '#95a5a6'
+          ],
+          'fill-opacity': 0.6
+        }
+      });
+
+      // Add drainage lines layer
+      mapDistrict.addSource('drainage-lines', {
+        type: 'geojson',
+        data: 'data/processed/combine-sewer-drainage.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'drainage-lines',
+        type: 'fill',
+        source: 'drainage-lines',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': '#ff6b6b',
+          'fill-opacity': 0.4
+        }
+      });
+
+      mapDistrict.addLayer({
+        id: 'drainage-lines-outline',
+        type: 'line',
+        source: 'drainage-lines',
+        layout: { visibility: 'none' },
+        paint: {
+          'line-color': '#cc5555',
+          'line-width': 1.5,
+          'line-opacity': 0.8
+        }
+      });
+
+      // Add drainage points layer
+      mapDistrict.addSource('drainage-points', {
+        type: 'geojson',
+        data: 'data/processed/drainage points.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'drainage-points',
+        type: 'circle',
+        source: 'drainage-points',
+        layout: { visibility: 'none' },
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10, 3,
+            15, 8
+          ],
+          'circle-color': '#4ecdc4',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-opacity': 0.8
+        }
+      });
+
+      // Add soils layer
+      mapDistrict.addSource('soils', {
+        type: 'geojson',
+        data: 'data/processed/rain-gardens/nyc_native_soils_for_rain_gardens.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'soils-layer',
+        type: 'fill',
+        source: 'soils',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': [
+            'match',
+            ['get', 'MUSYM'],
+            'BoA', '#8B4513',
+            'BoB', '#A0522D',
+            'BoC', '#CD853F',
+            'BoD', '#DEB887',
+            'CeB', '#D2691E',
+            'CeC', '#F4A460',
+            'ChB', '#DAA520',
+            'Pf', '#6B8E23',
+            'RaA', '#556B2F',
+            'Ud', '#696969',
+            '#999'
+          ],
+          'fill-opacity': 0.6
+        }
+      });
+
+      // Add slope layer
+      mapDistrict.addSource('slope', {
+        type: 'geojson',
+        data: 'data/processed/queens-tracts-slope-wgs84.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'slope-layer',
+        type: 'fill',
+        source: 'slope',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': [
+            'step',
+            ['get', 'Mean_slope'],
+            '#f7fcf5', 0,
+            '#e5f5e0', 2,
+            '#c7e9c0', 4,
+            '#a1d99b', 6,
+            '#74c476', 8,
+            '#41ab5d', 10,
+            '#238b45', 12,
+            '#006d2c', 14,
+            '#00441b', 16,
+            '#003d19', 18
+          ],
+          'fill-opacity': 0.6
+        }
+      });
+
+      mapDistrict.addLayer({
+        id: 'slope-outline',
+        type: 'line',
+        source: 'slope',
+        layout: { visibility: 'none' },
+        paint: {
+          'line-color': '#006d2c',
+          'line-width': 0.5,
+          'line-opacity': 0.4
+        }
+      });
+
+      // Add density layer
+      mapDistrict.addSource('gi-density', {
+        type: 'geojson',
+        data: 'data/processed/gi-surface-density-queens-wgs84-with-counts.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'density-layer',
+        type: 'fill',
+        source: 'gi-density',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': [
+            'step',
+            ['get', 'asset_id_count'],
+            '#fce4ec', 0,
+            '#f8bbd0', 3,
+            '#f48fb1', 6,
+            '#f06292', 10,
+            '#ec407a', 15,
+            '#e91e63', 20,
+            '#d81b60', 25,
+            '#c2185b', 30,
+            '#ad1457', 40,
+            '#880e4f', 50
+          ],
+          'fill-opacity': [
+            'case',
+            ['<', ['get', 'asset_id_count'], 3],
+            0,
+            0.7
+          ]
+        }
+      });
+
+      mapDistrict.addLayer({
+        id: 'density-outline',
+        type: 'line',
+        source: 'gi-density',
+        layout: { visibility: 'none' },
+        paint: {
+          'line-color': '#880e4f',
+          'line-width': 0.5,
+          'line-opacity': 0.4
+        }
+      });
+
+      // Add soils outline
+      mapDistrict.addLayer({
+        id: 'soils-outline',
+        type: 'line',
+        source: 'soils',
+        layout: { visibility: 'none' },
+        paint: {
+          'line-color': '#8B4513',
+          'line-width': 0.5,
+          'line-opacity': 0.4
+        }
+      });
+
+      // Add district boundaries
+      mapDistrict.addSource('districts', {
+        type: 'geojson',
+        data: 'data/processed/queens-council districts-districts.geojson'
+      });
+
+      mapDistrict.addLayer({
+        id: 'district-boundaries',
+        type: 'line',
+        source: 'districts',
+        paint: {
+          'line-color': '#2ecc71',
+          'line-width': 2,
+          'line-opacity': 0.6
+        }
+      });
+
+      mapDistrict.addLayer({
+        id: 'district-fill',
+        type: 'fill',
+        source: 'districts',
+        paint: {
+          'fill-color': 'transparent',
+          'fill-opacity': 0
+        }
+      });
+
+      // District click handler
+      mapDistrict.on('click', 'district-fill', (e) => {
+        if (e.features.length > 0) {
+          const district = e.features[0];
+          selectedDistrict = district;
+          
+          // Show district info
+          document.querySelector('.no-selection').style.display = 'none';
+          document.getElementById('district-content').style.display = 'block';
+          
+          // Update district name
+          const districtName = district.properties.CounDist || 'Unknown District';
+          document.getElementById('district-name').textContent = `Council District ${districtName}`;
+          
+          // Calculate statistics for the district
+          updateDistrictInfo(district);
+        }
+      });
+
+      // Change cursor on hover
+      mapDistrict.on('mouseenter', 'district-fill', () => {
+        mapDistrict.getCanvas().style.cursor = 'pointer';
+      });
+
+      mapDistrict.on('mouseleave', 'district-fill', () => {
+        mapDistrict.getCanvas().style.cursor = '';
+      });
+
+      // Layer toggle handlers
+      document.querySelectorAll('.district-layer-toggle').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+          const layerId = this.dataset.layer;
+          const visibility = this.checked ? 'visible' : 'none';
+          mapDistrict.setLayoutProperty(layerId, 'visibility', visibility);
+          
+          // Handle outline layers
+          const outlineId = layerId.replace('-layer', '-outline').replace('-dots', '-outline');
+          if (mapDistrict.getLayer(outlineId)) {
+            mapDistrict.setLayoutProperty(outlineId, 'visibility', visibility);
+          }
+        });
+      });
+
+      // Integrated layers panel opacity sliders
+      document.querySelectorAll('.layer-opacity-slider-integrated').forEach(slider => {
+        slider.addEventListener('input', function(e) {
+          e.stopPropagation();
+          
+          const layerId = this.dataset.layer;
+          const opacityPercent = parseInt(this.value);
+          const opacityDecimal = opacityPercent / 100;
+          
+          // Update the layer visibility and opacity
+          if (mapDistrict.getLayer(layerId)) {
+            if (layerId.includes('dots') || layerId.includes('points')) {
+              mapDistrict.setPaintProperty(layerId, 'circle-opacity', opacityDecimal);
+            } else if (!layerId.includes('outline')) {
+              mapDistrict.setPaintProperty(layerId, 'fill-opacity', opacityDecimal * 0.6);
+            }
+          }
+          
+          // Also update outline layer if it exists
+          const outlineId = layerId.replace('-layer', '-outline').replace('density', 'density-outline');
+          if (mapDistrict.getLayer(outlineId)) {
+            mapDistrict.setPaintProperty(outlineId, 'line-opacity', opacityDecimal * 0.3);
+          }
+        });
+      });
+
+      // Integrated layer list item clicks
+      document.querySelectorAll('#layerList-integrated .layer-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const layerId = this.dataset.layer;
+          this.classList.toggle('is-on');
+          const visibility = this.classList.contains('is-on') ? 'visible' : 'none';
+          
+          mapDistrict.setLayoutProperty(layerId, 'visibility', visibility);
+          
+          // Handle outline layers
+          const outlineId = layerId.replace('-layer', '-outline').replace('-dots', '-outline');
+          if (mapDistrict.getLayer(outlineId)) {
+            mapDistrict.setLayoutProperty(outlineId, 'visibility', visibility);
+          }
+        });
+      });
+    });
+
+    function updateDistrictInfo(district) {
+      // Get district bounds
+      const bounds = new mapboxgl.LngLatBounds();
+      const coords = district.geometry.coordinates[0];
+      coords.forEach(coord => bounds.extend(coord));
+      
+      // Zoom to district first
+      mapDistrict.fitBounds(bounds, { padding: 50, duration: 1000 });
+      
+      // Wait for map to render, then query features
+      setTimeout(() => {
+        // Query GI assets
+        const assetFeatures = mapDistrict.queryRenderedFeatures({
+          layers: ['gi-surface-dots']
+        });
+        
+        let assetCount = assetFeatures.length;
+        let totalArea = 0;
+        
+        assetFeatures.forEach(f => {
+          totalArea += f.properties.asset_area || 0;
+        });
+        
+        // Update asset info
+        document.getElementById('district-assets').textContent = assetCount || '0';
+        document.getElementById('district-area').textContent = Math.round(totalArea).toLocaleString() + ' sq ft';
+        
+        // Calculate density (assets per acre)
+        const districtAcres = district.properties.Shape_Area ? 
+          (district.properties.Shape_Area / 43560).toFixed(2) : 
+          'N/A';
+        document.getElementById('district-density').textContent = 
+          assetCount > 0 && districtAcres !== 'N/A' ? 
+          (assetCount / districtAcres).toFixed(2) + ' per acre' : 
+          'N/A';
+        
+        // Query sewer types
+        const sewerFeatures = mapDistrict.queryRenderedFeatures({
+          layers: ['sewer-layer']
+        });
+        
+        const sewerTypes = new Set();
+        sewerFeatures.forEach(f => {
+          const type = f.properties.COMB_OR_SE;
+          if (type) sewerTypes.add(type);
+        });
+        
+        document.getElementById('district-sewer').textContent = 
+          sewerTypes.size > 0 ? 
+          Array.from(sewerTypes).join(', ') : 
+          'Data not available';
+        
+        // Query soil types
+        const soilFeatures = mapDistrict.queryRenderedFeatures({
+          layers: ['soils-layer']
+        });
+        
+        const soilTypes = new Set();
+        soilFeatures.forEach(f => {
+          const type = f.properties.MUSYM;
+          if (type) soilTypes.add(type);
+        });
+        
+        document.getElementById('district-soil').textContent = 
+          soilTypes.size > 0 ? 
+          soilTypes.size + ' soil types' : 
+          'Data not available';
+        
+        // Query slope ranges
+        const slopeFeatures = mapDistrict.queryRenderedFeatures({
+          layers: ['slope-layer']
+        });
+        
+        let minSlope = Infinity;
+        let maxSlope = -Infinity;
+        
+        slopeFeatures.forEach(f => {
+          const slope = f.properties.Mean_slope;
+          if (slope !== null && slope !== undefined) {
+            minSlope = Math.min(minSlope, slope);
+            maxSlope = Math.max(maxSlope, slope);
+          }
+        });
+        
+        document.getElementById('district-slope').textContent = 
+          minSlope !== Infinity ? 
+          `${minSlope.toFixed(1)}% - ${maxSlope.toFixed(1)}%` : 
+          'Data not available';
+          
+      }, 1000); // Wait for map to finish zooming
+    }
+
+    // ===== MAINTENANCE EXPLORER LAYER CONTROLS =====
+    // Wait for external map to be ready
+    let mapScenarioReady = false;
+    const checkMapScenarioInterval = setInterval(() => {
+      // Check if mapScenario exists and is fully loaded
+      if (typeof mapScenario !== 'undefined' && mapScenario && mapScenario.isStyleLoaded && mapScenario.isStyleLoaded()) {
+        clearInterval(checkMapScenarioInterval);
+        mapScenarioReady = true;
+        initMaintenanceLayerControls();
+      }
+    }, 100);
+
+    // Fallback: initialize after a delay
+    setTimeout(() => {
+      if (!mapScenarioReady && typeof mapScenario !== 'undefined' && mapScenario) {
+        initMaintenanceLayerControls();
+      }
+    }, 3000);
+
+    function initMaintenanceLayerControls() {
+      // Maintenance layers panel opacity sliders
+      document.querySelectorAll('.layer-opacity-slider-maintenance').forEach(slider => {
+        slider.addEventListener('input', function(e) {
+          e.stopPropagation();
+          
+          const layerId = this.dataset.layer;
+          const opacityPercent = parseInt(this.value);
+          const opacityDecimal = opacityPercent / 100;
+          
+          if (mapScenario && mapScenario.getLayer(layerId)) {
+            if (layerId.includes('dots') || layerId.includes('points')) {
+              mapScenario.setPaintProperty(layerId, 'circle-opacity', opacityDecimal);
+            } else if (!layerId.includes('outline')) {
+              mapScenario.setPaintProperty(layerId, 'fill-opacity', opacityDecimal * 0.6);
+            }
+          }
+          
+          // Update outline layer if exists
+          const outlineId = layerId.replace('-layer', '-outline');
+          if (mapScenario && mapScenario.getLayer(outlineId)) {
+            mapScenario.setPaintProperty(outlineId, 'line-opacity', opacityDecimal * 0.3);
+          }
+        });
+      });
+
+      // Maintenance layer list item clicks
+      document.querySelectorAll('#layerList-maintenance .layer-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const layerId = this.dataset.layer;
+          this.classList.toggle('is-on');
+          const visibility = this.classList.contains('is-on') ? 'visible' : 'none';
+          
+          if (mapScenario && mapScenario.getLayer(layerId)) {
+            mapScenario.setLayoutProperty(layerId, 'visibility', visibility);
+            
+            // Handle outline layers
+            const outlineId = layerId.replace('-layer', '-outline');
+            if (mapScenario.getLayer(outlineId)) {
+              mapScenario.setLayoutProperty(outlineId, 'visibility', visibility);
+            }
+          }
+        });
+      });
+
+      // Add hover interactions to display feature info
+      addMaintenanceFeatureHovers();
+    }
+
+    function addMaintenanceFeatureHovers() {
+      if (!mapScenario) return;
+
+      const featureInfoDiv = document.getElementById('feature-info');
+      const layersToTrack = ['gi-surface-dots', 'gi-density-layer', 'soils-layer', 'slope-layer', 'sewer-layer', 'drainage-lines', 'drainage-points'];
+
+      layersToTrack.forEach(layerId => {
+        if (!mapScenario.getLayer(layerId)) return;
+
+        mapScenario.on('mousemove', layerId, (e) => {
+          if (e.features.length > 0) {
+            const feature = e.features[0];
+            displayFeatureInfo(feature, featureInfoDiv);
+          }
+        });
+
+        mapScenario.on('mouseleave', layerId, () => {
+          featureInfoDiv.innerHTML = '<p class="muted">Hover over features on the map to see details</p>';
+        });
+      });
+    }
+
+    function displayFeatureInfo(feature, infoDiv) {
+      const props = feature.properties;
+      let html = `<strong>${feature.properties.asset_type || feature.properties.MUSYM || 'Feature'}</strong>`;
+
+      // Add relevant properties based on feature type
+      if (props.asset_id) {
+        html += `<div class="feature-property"><strong>Asset ID:</strong> <span>${props.asset_id}</span></div>`;
+      }
+      if (props.asset_area) {
+        html += `<div class="feature-property"><strong>Area:</strong> <span>${props.asset_area.toLocaleString()} sq ft</span></div>`;
+      }
+      if (props.COMB_OR_SE) {
+        html += `<div class="feature-property"><strong>Sewer Type:</strong> <span>${props.COMB_OR_SE}</span></div>`;
+      }
+      if (props.MUSYM) {
+        html += `<div class="feature-property"><strong>Soil:</strong> <span>${props.MUSYM}</span></div>`;
+      }
+      if (props.Mean_slope !== null && props.Mean_slope !== undefined) {
+        html += `<div class="feature-property"><strong>Slope:</strong> <span>${props.Mean_slope.toFixed(2)}%</span></div>`;
+      }
+      if (props.acreage) {
+        html += `<div class="feature-property"><strong>Acreage:</strong> <span>${props.acreage.toFixed(2)}</span></div>`;
+      }
+      if (props.outfall) {
+        html += `<div class="feature-property"><strong>Outfall:</strong> <span>${props.outfall}</span></div>`;
+      }
+      if (props.outfall_ty) {
+        html += `<div class="feature-property"><strong>Type:</strong> <span>${props.outfall_ty}</span></div>`;
+      }
+
+      infoDiv.innerHTML = html;
+    }
 
   </script>
   <script src="js/index.js"></script>
