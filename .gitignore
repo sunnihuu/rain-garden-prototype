@@ -1,0 +1,8 @@
+
+# Ignore GIS data
+data/original/
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg
