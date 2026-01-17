@@ -19,10 +19,11 @@
   <div class="scroll-container">
     <!-- Screen 1: Landing Page -->
     <section class="screen" id="screen-map">
+      <div class="dark-overlay"></div>
       <h1 class="title-overlay">Rain Garden Maintenance</h1>
       <div class="landing-buttons">
-        <button class="landing-btn">Environmental Context</button>
-        <button class="landing-btn">Maintenance Impact Simulator</button>
+        <button class="landing-btn" onclick="document.getElementById('screen-combined-map').scrollIntoView({behavior: 'smooth'})">Environmental Context</button>
+        <button class="landing-btn" onclick="document.getElementById('screen-scenario').scrollIntoView({behavior: 'smooth'})">Maintenance Impact Simulator</button>
       </div>
       <div class="about-overlay">About</div>
     </section>
