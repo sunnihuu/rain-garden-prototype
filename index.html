@@ -3,15 +3,976 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Base Map | Mapbox Light</title>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <link rel="stylesheet" href="map.css" />
+  <title>Flushing GI Scenario Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+  <link href="css/index.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div id="map" aria-label="Base map"></div>
+  <div class="scroll-container">
+    <!-- Screen 1: Landing Page -->
+    <section class="screen" id="screen-map">
+      <h1 class="title-overlay">Rain Gardens</h1>
+      <div class="about-overlay">About</div>
+    </section>
 
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
-  <script src="map.js"></script>
+    <!-- Screen 2: Combined Map with Layer Controls -->
+    <section class="screen" id="screen-combined-map">
+      <div id="map" class="map-container"></div>
+      
+      <!-- Control Panel Toggle Buttons (Upper Left) -->
+      <div class="control-panel-buttons">
+        <button class="control-btn" data-panel="layers">
+          <span class="btn-text">Layers</span>
+        </button>
+        <button class="control-btn" data-panel="insights">
+          <span class="btn-text">Explore Insights</span>
+        </button>
+      </div>
+
+      <!-- Layer Management Panel (Upper Left - Collapsible) -->
+      <div class="control-panel" id="layers-panel">
+        <div class="panel-title">Layers</div>
+        <ul id="layerList" class="layer-list">
+          <li class="layer-item is-on" draggable="true" data-layer="gi-surface-dots">
+            <span>GI Distribution</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="gi-surface-dots" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="gi-density-layer">
+            <span>Density Map</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="gi-density-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="soils-layer">
+            <span>Native Soils</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="soils-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+          <li class="layer-item" draggable="true" data-layer="slope-layer">
+            <span>Terrain Slope</span>
+            <div class="layer-opacity-control">
+              <input type="range" class="layer-opacity-slider" data-layer="slope-layer" min="0" max="100" value="100">
+            </div>
+          </li>
+        </ul>
+        <p class="hint">Click to toggle. Drag to reorder.</p>
+      </div>
+
+      <!-- Insights Panel (Upper Left - Collapsible) -->
+      <div class="control-panel" id="insights-panel">
+        <div class="panel-title">Explore Insights</div>
+        <div class="insights-buttons">
+          <button class="insight-btn" data-insight="density">
+            <div class="btn-icon">📍</div>
+            <div class="btn-label">Where are rain gardens concentrated?</div>
+          </button>
+          <button class="insight-btn" data-insight="soils">
+            <div class="btn-icon">🌱</div>
+            <div class="btn-label">Where are conditions favorable?</div>
+          </button>
+          <button class="insight-btn" data-insight="slope">
+            <div class="btn-icon">⛰️</div>
+            <div class="btn-label">Where might gardens struggle?</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- GI Distribution Modal -->
+      <div id="gi-modal" class="layer-modal">
+        <h2 class="modal-title">Rain Garden Assets</h2>
+        <div class="modal-content">
+          <p>Rain garden and related green infrastructure assets. Larger circles indicate larger installations.</p>
+          <div class="legend">
+            <div class="legend-label">Asset Type</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #17A2B8; border-radius: 50%; border: 2px solid white;"></div>
+              <span data-type="Rain Garden">Rain Garden</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #2ecc71; border-radius: 50%; border: 2px solid white;"></div>
+              <span data-type="ROWRG">Rain Garden in Street</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #FFB366; border-radius: 50%; border: 2px solid white;"></div>
+              <span data-type="ROWB">Bioswale (drainage)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #9B59B6; border-radius: 50%; border: 2px solid white;"></div>
+              <span data-type="ROWGS">Green Street</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #E85D75; border-radius: 50%; border: 2px solid white;"></div>
+              <span data-type="ROWSGS">Stormwater Green Street</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Density Modal -->
+      <div id="density-modal" class="layer-modal">
+        <h2 class="modal-title">Rain Garden Density in Queens</h2>
+        <div class="modal-content">
+          <p>Darker areas show concentrated rain garden clusters.</p>
+          <div class="legend">
+            <div class="legend-label">Gardens per Grid Cell</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #fce4ec;"></div>
+              <span>1–4</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #f8bbd0;"></div>
+              <span>5–8</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #f48fb1;"></div>
+              <span>9–12</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #f06292;"></div>
+              <span>13–16</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #ec407a;"></div>
+              <span>17–20</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #e91e63;"></div>
+              <span>21–24</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #d81b60;"></div>
+              <span>25–28</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #c2185b;"></div>
+              <span>29–32</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #ad1457;"></div>
+              <span>33–36</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #880e4f;"></div>
+              <span>37+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Soils Modal -->
+      <div id="soils-modal" class="layer-modal">
+        <h2 class="modal-title">Native Soil Conditions</h2>
+        <div class="modal-content">
+          <p>Better drainage = better for rain gardens. Hover for details.</p>
+          <div class="legend">
+            <div class="legend-label">Hydrologic Soil Group</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #1e7145;"></div>
+              <span>Type A — Best</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #2ecc71;"></div>
+              <span>Type A/D — Variable</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #f4d03f;"></div>
+              <span>Type B — Good</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #f8a028;"></div>
+              <span>Type B/D — Variable</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #e67e22;"></div>
+              <span>Type C — Fair</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #c0392b;"></div>
+              <span>Type D — Poor</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slope Modal -->
+      <div id="slope-modal" class="layer-modal">
+        <h2 class="modal-title">Terrain Challenges</h2>
+        <div class="modal-content">
+          <p>Flat areas allow water to settle, steep slopes increase runoff.</p>
+          <div class="legend">
+            <div class="legend-label">Slope Range (%)</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #f0f8ff;"></div>
+              <span>0–1.03</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #d4e9f7;"></div>
+              <span>1.03–2.06</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #a8d4ed;"></div>
+              <span>2.06–3.09</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #7cbde3;"></div>
+              <span>3.09–4.12</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #50a8d9;"></div>
+              <span>4.12–5.15</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #2493cf;"></div>
+              <span>5.15–6.18</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #1578b8;"></div>
+              <span>6.18–7.21</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #0f5fa1;"></div>
+              <span>7.21–8.24</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #0a468a;"></div>
+              <span>8.24–9.27</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #0c2340;"></div>
+              <span>9.27+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Rain Garden Prototype Panel with Map -->
+    <section class="screen" id="screen-scenario">
+      <div id="map-scenario" class="map-container-scenario"></div>
+      <div id="panel-scenario" class="scenario-panel">
+        <section class="block">
+          <h2>Selection</h2>
+          <div class="row">
+            <label class="radio"><input type="radio" name="mode" value="replace" checked /> <span>Replace selection</span></label>
+            <label class="radio"><input type="radio" name="mode" value="add" /> <span>Add to selection</span></label>
+          </div>
+          <label class="label" for="councilSelect">City Council District</label>
+          <select id="councilSelect"><option value="">Select…</option></select>
+          <label class="label" for="communitySelect">Community District</label>
+          <select id="communitySelect"><option value="">Select…</option></select>
+          <button id="clearBtn" class="btn secondary">Clear selection</button>
+        </section>
+
+        <section class="block">
+          <h2>Maintenance Degradation</h2>
+          <label class="label" for="weeksRange">Weeks since last maintained</label>
+          <input id="weeksRange" type="range" min="0" max="8" step="1" value="0" />
+          <div class="row space">
+            <span class="badge"><span id="weeksValue">0</span> weeks</span>
+            <small class="muted">Capacity clamps at 20% by week 8.</small>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>Summary</h2>
+          <div class="summary">
+            <div><div class="summary-label">Gardens Selected</div><div class="summary-value" id="count">0</div></div>
+            <div><div class="summary-label">Water Diverted (gal)</div><div class="summary-value" id="gallons">0</div></div>
+            <div><div class="summary-label">Maintenance (hrs/mo)</div><div class="summary-value" id="hours">0</div></div>
+            <div><div class="summary-label">Avg Effective Capacity</div><div class="summary-value" id="avg">0</div></div>
+          </div>
+          <small class="muted">
+            effective_capacity = base_capacity_gal × (1 - 0.10 × weeks), min 20% of base.
+          </small>
+        </section>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Landing page background
+    document.getElementById('screen-map').style.backgroundImage = "url('rain garden images/stewardship.jpg')";
+    document.getElementById('screen-map').style.backgroundSize = "cover";
+    document.getElementById('screen-map').style.backgroundPosition = "center";
+
+    // Initialize Mapbox
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic3VubmlodSIsImEiOiJjbWQ2bDBwNzcwMThwMm9weTVjc2JuNG90In0.sVXA1xGrFWnG-1ZV_EyO1w';
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-73.8298, 40.73],
+      zoom: 10.8
+    });
+
+    map.addControl(new mapboxgl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true,
+      showUserHeading: true
+    }));
+
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    let layersLoaded = false;
+    let assetChart = null;
+
+    map.on('load', function() {
+      if (layersLoaded) return;
+      layersLoaded = true;
+
+      // Add GI surface layer
+      map.addSource('gi-surface', {
+        type: 'geojson',
+        data: 'data/processed/gi-surface-queens.geojson'
+      });
+
+      map.addLayer({
+        id: 'gi-surface-dots',
+        type: 'circle',
+        source: 'gi-surface',
+        layout: { visibility: 'visible' },
+        filter: ['in', ['get', 'asset_type'], ['literal', ['Rain Garden', 'ROWB', 'ROWGS', 'ROWRG', 'ROWSGS']]],
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['get', 'asset_area'], 0, 3, 500, 10],
+          'circle-color': [
+            'match', ['get', 'asset_type'],
+            'Rain Garden', '#17A2B8',
+            'ROWRG', '#2ecc71',
+            'ROWB', '#FFB366',
+            'ROWGS', '#9B59B6',
+            'ROWSGS', '#E85D75',
+            '#999999'
+          ],
+          'circle-opacity': 1.0,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 0.5
+        }
+      });
+
+      // Add hover popup for GI dots
+      map.on('mouseenter', 'gi-surface-dots', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'gi-surface-dots', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      // Create a popup for GI hover info
+      const giPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
+      map.on('mousemove', 'gi-surface-dots', (e) => {
+        const props = e.features[0].properties;
+        const assetTypeNames = {
+          'Rain Garden': 'Rain Garden',
+          'ROWRG': 'Rain Garden in Street',
+          'ROWB': 'Bioswale (drainage)',
+          'ROWGS': 'Green Street',
+          'ROWSGS': 'Stormwater Green Street'
+        };
+        const friendlyAssetType = assetTypeNames[props.asset_type] || props.asset_type;
+        
+        let popupHTML = `
+          <div style="font-family: 'League Spartan', sans-serif; font-size: 12px; max-width: 300px;">
+            <b style="font-size: 14px;">${friendlyAssetType}</b><br/>
+            <hr style="margin: 5px 0; border: none; border-top: 1px solid #ccc;">
+            <table style="width: 100%; font-size: 11px; line-height: 1.6;">
+              <tr><td><b>Asset Type:</b></td><td>${props.asset_type || 'N/A'}</td></tr>
+              <tr><td><b>Sewer Type:</b></td><td>${props.sewer_type || 'N/A'}</td></tr>
+              <tr><td><b>NYC Waters:</b></td><td>${props.nyc_waters || 'N/A'}</td></tr>
+              <tr><td><b>Asset Area:</b></td><td>${Math.round(props.asset_area || 0)} sq ft</td></tr>
+              <tr><td><b>Tree (Latin):</b></td><td>${props.tree_latin || 'N/A'}</td></tr>
+              <tr><td><b>Program/AR:</b></td><td>${props.program_ar || 'N/A'}</td></tr>
+              <tr><td><b>Date Constructed:</b></td><td>${props.date_const || 'N/A'}</td></tr>
+            </table>
+          </div>
+        `;
+        
+        giPopup.setLngLat(e.lngLat).setHTML(popupHTML).addTo(map);
+      });
+
+      map.on('mouseleave', 'gi-surface-dots', () => {
+        giPopup.remove();
+      });
+
+      // Add Density layer
+      map.addSource('gi-density', {
+        type: 'geojson',
+        data: 'data/processed/gi-surface-density-queens-wgs84-with-counts.geojson'
+      });
+
+      map.addLayer({
+        id: 'gi-density-layer',
+        type: 'fill',
+        source: 'gi-density',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': ['step', ['get', 'asset_id_count'], '#fce4ec', 5, '#f8bbd0', 9, '#f48fb1', 13, '#f06292', 17, '#ec407a', 21, '#e91e63', 25, '#d81b60', 29, '#c2185b', 33, '#ad1457', 37, '#880e4f'],
+          'fill-opacity': ['case', ['<', ['get', 'asset_id_count'], 3], 0, 1.0]
+        }
+      });
+
+      map.addLayer({
+        id: 'gi-density-outline',
+        type: 'line',
+        source: 'gi-density',
+        layout: { visibility: 'none' },
+        paint: { 'line-color': '#ffffff', 'line-width': 0.5, 'line-opacity': 0.15 }
+      });
+
+      // Add Soils layer
+      map.addSource('soils', {
+        type: 'geojson',
+        data: 'data/processed/nyc_native_soils_for_rain_gardens.geojson'
+      });
+
+      map.addLayer({
+        id: 'soils-layer',
+        type: 'fill',
+        source: 'soils',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': ['match', ['get', 'hsg_native'], 'A', '#1e7145', 'A/D', '#2ecc71', 'B', '#f4d03f', 'B/D', '#f8a028', 'C', '#e67e22', 'C/D', '#d68910', 'D', '#c0392b', '#999999'],
+          'fill-opacity': 0.7
+        }
+      });
+
+      map.addLayer({
+        id: 'soils-outline',
+        type: 'line',
+        source: 'soils',
+        layout: { visibility: 'none' },
+        paint: { 'line-color': '#ffffff', 'line-width': 0.5, 'line-opacity': 0.3 }
+      });
+
+      // Add hover effects for soils layer
+      map.on('mouseenter', 'soils-layer', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'soils-layer', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      // Create a popup for soil hover info
+      const soilPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
+      map.on('mousemove', 'soils-layer', (e) => {
+        const props = e.features[0].properties;
+        
+        // Get infiltration rate description based on HSG
+        const infiltrationInfo = {
+          'A': 'Excellent (>8 in/hr) - Ideal for rain gardens',
+          'A/D': 'Variable - Good when drained',
+          'B': 'Good (4-8 in/hr) - Suitable for rain gardens',
+          'B/D': 'Variable - Moderate when drained',
+          'C': 'Moderate (1-4 in/hr) - Possible with amendments',
+          'C/D': 'Variable - Limited when drained',
+          'D': 'Poor (<1 in/hr) - Not recommended'
+        };
+
+        const infiltrationDesc = infiltrationInfo[props.hsg_native] || 'Unknown';
+        
+        let popupHTML = `
+          <div style="font-family: 'League Spartan', sans-serif; font-size: 12px; max-width: 300px;">
+            <b style="font-size: 14px;">Native Soil Information</b><br/>
+            <hr style="margin: 5px 0; border: none; border-top: 1px solid #ccc;">
+            <table style="width: 100%; font-size: 11px; line-height: 1.6;">
+              <tr><td><b>Soil Type:</b></td><td>${props.dominant_soil || 'N/A'}</td></tr>
+              <tr><td><b>Soil Symbol:</b></td><td>${props.MUSYM || 'N/A'}</td></tr>
+              <tr><td><b>HSG Type:</b></td><td>${props.hsg_native || 'N/A'}</td></tr>
+              <tr><td><b>Infiltration:</b></td><td>${infiltrationDesc}</td></tr>
+              <tr><td><b>Texture:</b></td><td>${props.texture_group || 'N/A'}</td></tr>
+              <tr><td><b>Drainage:</b></td><td>${props.drainage_native || 'N/A'}</td></tr>
+            </table>
+          </div>
+        `;
+        
+        soilPopup.setLngLat(e.lngLat).setHTML(popupHTML).addTo(map);
+      });
+
+      map.on('mouseleave', 'soils-layer', () => {
+        soilPopup.remove();
+      });
+
+      // Add Slope layer
+      map.addSource('slope', {
+        type: 'geojson',
+        data: 'data/processed/queens-tracts-slope-wgs84.geojson'
+      });
+
+      map.addLayer({
+        id: 'slope-layer',
+        type: 'fill',
+        source: 'slope',
+        layout: { visibility: 'none' },
+        paint: {
+          'fill-color': ['step', ['get', 'Slope'], '#f0f8ff', 1.03, '#d4e9f7', 2.06, '#a8d4ed', 3.09, '#7cbde3', 4.12, '#50a8d9', 5.15, '#2493cf', 6.18, '#1578b8', 7.21, '#0f5fa1', 8.24, '#0a468a', 9.27, '#0c2340'],
+          'fill-opacity': 1.0
+        }
+      });
+
+      map.addLayer({
+        id: 'slope-outline',
+        type: 'line',
+        source: 'slope',
+        layout: { visibility: 'none' },
+        paint: { 'line-color': '#ffffff', 'line-width': 0.5, 'line-opacity': 0 }
+      });
+
+      // Slope layer hover interaction
+      const slopePopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
+      map.on('mousemove', 'slope-layer', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const slope = e.features[0].properties.Slope;
+        
+        let slopeCategory = '';
+        let interpretation = '';
+        
+        if (slope < 2) {
+          slopeCategory = 'Flat terrain';
+          interpretation = 'Excellent for water infiltration and rain gardens';
+        } else if (slope < 5) {
+          slopeCategory = 'Gentle slope';
+          interpretation = 'Good for rain gardens with proper design';
+        } else if (slope < 8) {
+          slopeCategory = 'Moderate slope';
+          interpretation = 'May need terracing for rain gardens';
+        } else {
+          slopeCategory = 'Steep slope';
+          interpretation = 'High runoff risk - rain gardens challenging';
+        }
+        
+        const html = `
+          <div style="font-family: 'League Spartan', sans-serif; font-size: 14px; line-height: 1.6;">
+            <strong>Terrain Slope</strong><br>
+            <strong>${slope.toFixed(1)}%</strong> - ${slopeCategory}<br>
+            <span style="color: #666;">${interpretation}</span>
+          </div>
+        `;
+        
+        slopePopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      });
+
+      map.on('mouseleave', 'slope-layer', () => {
+        map.getCanvas().style.cursor = '';
+        slopePopup.remove();
+      });
+
+      // Layer management
+      const list = document.getElementById('layerList');
+
+      function setLayerVisible(layerId, visible) {
+        map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+        if (layerId.includes('outline')) {
+          map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+        }
+      }
+
+      function applyLayerOrderFromList() {
+        const layerNames = Array.from(list.querySelectorAll('.layer-item')).map(item => item.dataset.layer);
+        let firstLayer = null;
+        for (const layer of map.getStyle().layers) {
+          if (layerNames.includes(layer.id)) {
+            if (!firstLayer) firstLayer = layer.id;
+            if (layer.id !== layerNames[0]) {
+              map.moveLayer(layer.id, layerNames[0]);
+            }
+          }
+        }
+      }
+
+      function updateLegendDisplay() {
+        const activeItems = Array.from(list.querySelectorAll('.layer-item.is-on'));
+        const activeLayers = activeItems.map(item => item.dataset.layer);
+        
+        document.getElementById('gi-modal').classList.toggle('active', activeLayers.includes('gi-surface-dots'));
+        document.getElementById('density-modal').classList.toggle('active', activeLayers.includes('gi-density-layer'));
+        document.getElementById('soils-modal').classList.toggle('active', activeLayers.includes('soils-layer'));
+        document.getElementById('slope-modal').classList.toggle('active', activeLayers.includes('slope-layer'));
+        
+        if (activeLayers.includes('gi-surface-dots')) {
+          setTimeout(() => {
+            updateGIAssetStats();
+            generateAssetChart();
+          }, 100);
+        }
+      }
+
+      function applyInitialVisibility() {
+        const activeItems = Array.from(list.querySelectorAll('.layer-item.is-on'));
+        const layerMap = {
+          'gi-surface-dots': ['gi-surface-dots'],
+          'gi-density-layer': ['gi-density-layer', 'gi-density-outline'],
+          'soils-layer': ['soils-layer', 'soils-outline'],
+          'slope-layer': ['slope-layer', 'slope-outline']
+        };
+
+        for (const [dataset, layers] of Object.entries(layerMap)) {
+          const isActive = activeItems.some(item => item.dataset.layer === dataset);
+          for (const layer of layers) {
+            setLayerVisible(layer, isActive);
+          }
+        }
+        updateLegendDisplay();
+      }
+
+      function updateGIAssetStats() {
+        if (!map.getSource('gi-surface')) return;
+
+        const features = map.querySourceFeatures('gi-surface');
+        const stats = {};
+        let totalCount = 0;
+        
+        features.forEach(f => {
+          const type = f.properties.asset_type || 'Unknown';
+          const area = f.properties.asset_area || 0;
+          if (!stats[type]) {
+            stats[type] = { count: 0, totalArea: 0 };
+          }
+          stats[type].count += 1;
+          stats[type].totalArea += area;
+          totalCount += 1;
+        });
+
+        // Update legend header with total asset count
+        const legendLabelEl = document.querySelector('#gi-modal .legend-label');
+        if (legendLabelEl) {
+          legendLabelEl.textContent = `Asset Types — ${totalCount.toLocaleString()} assets`;
+        }
+
+        // Update legend items: show only types with non-zero share, and show count only
+        const assetTypeNames = {
+          'Rain Garden': 'Rain Garden',
+          'ROWRG': 'Rain Garden in Street',
+          'ROWB': 'Bioswale (drainage)',
+          'ROWGS': 'Green Street',
+          'ROWSGS': 'Stormwater Green Street'
+        };
+        const legendItems = document.querySelectorAll('#gi-modal .legend-item');
+        legendItems.forEach(item => {
+          const span = item.querySelector('span');
+          const assetType = span.getAttribute('data-type');
+          const stat = stats[assetType];
+          const pct = totalCount > 0 && stat ? (stat.count / totalCount) * 100 : 0;
+          if (!stat || pct === 0) {
+            item.style.display = 'none';
+          } else {
+            const friendlyName = assetTypeNames[assetType] || assetType;
+            span.textContent = `${friendlyName}: ${stat.count} assets`;
+            item.style.display = '';
+          }
+        });
+      }
+
+      function generateAssetChart() {
+        const features = map.querySourceFeatures('gi-surface');
+        const stats = {};
+
+        features.forEach(f => {
+          const type = f.properties.asset_type || 'Unknown';
+          const area = f.properties.asset_area || 0;
+          if (!stats[type]) {
+            stats[type] = { count: 0, totalArea: 0 };
+          }
+          stats[type].count += 1;
+          stats[type].totalArea += area;
+        });
+
+        const sortedTypes = Object.keys(stats).sort((a, b) => stats[b].count - stats[a].count);
+        const chartCanvas = document.getElementById('assetChart');
+        
+        if (assetChart) {
+          assetChart.destroy();
+        }
+
+        const ctx = chartCanvas.getContext('2d');
+        // Compute totals and filter out zero-percent assets
+        let totalCount = 0;
+        let totalArea = 0;
+        sortedTypes.forEach(t => {
+          totalCount += stats[t].count;
+          totalArea += stats[t].totalArea;
+        });
+
+        const filteredTypes = sortedTypes.filter(t => {
+          const pct = totalCount > 0 ? (stats[t].count / totalCount) * 100 : 0;
+          return pct > 0; // exclude zero-percent
+        });
+
+        assetChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: filteredTypes.map(t => t.length > 20 ? t.substring(0, 17) + '...' : t),
+            datasets: [{
+              label: 'Number of Assets',
+              data: filteredTypes.map(t => stats[t].count),
+              backgroundColor: '#2ecc71',
+              borderColor: '#27ae60',
+              borderWidth: 1,
+              borderRadius: 4,
+              barPercentage: 0.8
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return context.parsed.x + ' assets';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                ticks: { font: { size: 10 } },
+                grid: { drawBorder: false, color: 'rgba(0,0,0,0.05)' }
+              },
+              y: {
+                ticks: { font: { size: 10 } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+
+        // Generate stats table
+        const tableHtml = `
+          <div class="stats-table-header">
+            <div>Asset Type</div>
+            <div>Count</div>
+            <div>Total Area</div>
+          </div>
+        `;
+
+        const tableRows = filteredTypes.map(t => {
+          return `
+            <div class="stats-table-row">
+              <div class="stats-type-name">${t}</div>
+              <div class="stats-cell">${stats[t].count}</div>
+              <div class="stats-cell">${Math.round(stats[t].totalArea).toLocaleString()}</div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('statsTable').innerHTML = tableHtml + tableRows;
+      }
+
+      // Layer click handler
+      list.addEventListener('click', (e) => {
+        const item = e.target.closest('.layer-item');
+        if (!item) return;
+
+        item.classList.toggle('is-on');
+        const layerId = item.dataset.layer;
+        setLayerVisible(layerId, item.classList.contains('is-on'));
+        
+        const outlineId = layerId.replace('layer', 'outline').replace('-dots', '-outline');
+        if (map.getLayer(outlineId)) {
+          setLayerVisible(outlineId, item.classList.contains('is-on'));
+        }
+        
+        applyLayerOrderFromList();
+        updateLegendDisplay();
+      });
+
+      // Drag handlers
+      let draggingEl = null;
+
+      function getDragAfterElement(container, y) {
+        const elements = [...container.querySelectorAll('.layer-item:not(.dragging)')];
+        return elements.reduce((closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset, element: child };
+          }
+          return closest;
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+      }
+
+      list.addEventListener('dragstart', (e) => {
+        const item = e.target.closest('.layer-item');
+        if (!item) return;
+        draggingEl = item;
+        draggingEl.classList.add('dragging');
+      });
+
+      list.addEventListener('dragend', () => {
+        if (!draggingEl) return;
+        draggingEl.classList.remove('dragging');
+        draggingEl = null;
+        applyLayerOrderFromList();
+      });
+
+      list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterEl = getDragAfterElement(list, e.clientY);
+        if (!draggingEl) return;
+        if (afterEl == null) {
+          list.appendChild(draggingEl);
+        } else {
+          list.insertBefore(draggingEl, afterEl);
+        }
+      });
+
+      // Stats panel toggle
+      document.getElementById('stats-toggle').addEventListener('click', function() {
+        this.classList.toggle('collapsed');
+        document.querySelector('.stats-content').style.display = this.classList.contains('collapsed') ? 'none' : 'block';
+      });
+
+      // Initialize
+      applyInitialVisibility();
+      setTimeout(() => {
+        updateGIAssetStats();
+        generateAssetChart();
+      }, 500);
+
+      // Insight button handlers
+      function handleInsightClick(insight, btnElement) {
+        // Update button active state
+        document.querySelectorAll('.insight-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        btnElement.classList.add('active');
+
+        // Layer mappings for each insight
+        const configs = {
+          density: {
+            show: ['gi-density-layer', 'gi-surface-dots'],
+            hide: ['soils-layer', 'slope-layer']
+          },
+          soils: {
+            show: ['soils-layer', 'gi-surface-dots'],
+            hide: ['gi-density-layer', 'slope-layer']
+          },
+          slope: {
+            show: ['slope-layer', 'gi-surface-dots'],
+            hide: ['gi-density-layer', 'soils-layer']
+          }
+        };
+
+        const config = configs[insight];
+        
+        // Turn off hidden layers and outlines
+        config.hide.forEach(layer => {
+          setLayerVisible(layer, false);
+          setLayerVisible(layer + '-outline', false);
+        });
+
+        // Turn on visible layers and outlines
+        config.show.forEach(layer => {
+          if (layer !== 'gi-surface-dots') {
+            setLayerVisible(layer + '-outline', true);
+          }
+          setLayerVisible(layer, true);
+        });
+
+        // Update legend display
+        updateLegendDisplay();
+
+        // Optional: Zoom to region for density insight
+        if (insight === 'density') {
+          map.flyTo({
+            center: [-73.8298, 40.73],
+            zoom: 11,
+            duration: 1500
+          });
+        }
+      }
+
+      document.querySelectorAll('.insight-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const insight = this.dataset.insight;
+          handleInsightClick(insight, this);
+        });
+      });
+    });
+
+    // Control panel switching (outside map.on('load') so it works immediately)
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const panelName = this.dataset.panel;
+        const targetPanel = document.getElementById(panelName + '-panel');
+        
+        if (targetPanel) {
+          // Close all other panels
+          document.querySelectorAll('.control-panel').forEach(panel => {
+            if (panel !== targetPanel) {
+              panel.classList.remove('active');
+            }
+          });
+          // Toggle the target panel
+          targetPanel.classList.toggle('active');
+        }
+      });
+    });
+
+    // Layer transparency control - individual sliders
+    document.querySelectorAll('.layer-opacity-slider').forEach(slider => {
+      // Prevent click/mousedown events from triggering layer toggle
+      slider.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+      
+      slider.addEventListener('mousedown', function(e) {
+        e.stopPropagation();
+      });
+      
+      slider.addEventListener('input', function(e) {
+        e.stopPropagation(); // Prevent triggering layer toggle
+        
+        const layerId = this.dataset.layer;
+        const opacityPercent = parseInt(this.value);
+        const opacityDecimal = opacityPercent / 100;
+        
+        // Apply opacity based on layer type
+        if (map.getLayer(layerId)) {
+          if (layerId.includes('dots')) {
+            map.setPaintProperty(layerId, 'circle-opacity', opacityDecimal);
+          } else if (!layerId.includes('outline')) {
+            map.setPaintProperty(layerId, 'fill-opacity', opacityDecimal);
+          }
+        }
+        
+        // Also update outline layer if it exists
+        const outlineId = layerId.replace('-dots', '-outline').replace('layer', 'outline');
+        if (map.getLayer(outlineId)) {
+          map.setPaintProperty(outlineId, 'line-opacity', opacityDecimal * 0.3);
+        }
+      });
+    });
+
+  </script>
+  <script src="js/index.js"></script>
 </body>
 </html>

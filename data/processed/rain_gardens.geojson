@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-73.8305, 40.7608] },
+      "properties": {
+        "asset_id": "RG-101",
+        "council_dist": "20",
+        "community_dist": "407",
+        "maintenance_hours_per_month": 4,
+        "base_capacity_gal": 2600
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-73.8462, 40.7441] },
+      "properties": {
+        "asset_id": "RG-202",
+        "council_dist": "24",
+        "community_dist": "408",
+        "maintenance_hours_per_month": 3,
+        "base_capacity_gal": 2500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-73.8715, 40.7315] },
+      "properties": {
+        "asset_id": "RG-303",
+        "council_dist": "21",
+        "community_dist": "403",
+        "maintenance_hours_per_month": 2.5,
+        "base_capacity_gal": 2400
+      }
+    }
+  ]
+}
