@@ -791,6 +791,9 @@
               if (mapScenario && mapScenario.getLayer('gi-surface-dots')) {
                 mapScenario.setFilter('gi-surface-dots', filter);
               }
+              
+              // Select all filtered assets and update summary
+              applyFiltersSelection();
             });
           }
 
