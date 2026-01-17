@@ -25,6 +25,9 @@ body { font-family: "League Spartan", -apple-system, BlinkMacSystemFont, "Segoe 
 /* Screen 1: Landing Page */
 #screen-hero { background-size: cover; background-position: center; background-attachment: fixed; }
 .title-overlay { position: absolute; top: 40px; left: 40px; z-index: 10; font-family: "Bebas Neue", sans-serif; font-size: 64px; font-weight: 400; color: white; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6); letter-spacing: 2px; }
+.landing-buttons { position: absolute; top: 140px; left: 40px; z-index: 10; display: flex; gap: 16px; }
+.landing-btn { padding: 12px 24px; border: 2px solid white; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 8px; cursor: pointer; font-family: "Bebas Neue", sans-serif; font-size: 16px; font-weight: 600; color: white; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+.landing-btn:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); }
 .about-overlay { position: absolute; bottom: 40px; left: 40px; z-index: 10; font-family: "League Spartan", sans-serif; font-size: 13px; font-weight: 600; color: white; text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6); letter-spacing: 0.5px; cursor: pointer; transition: opacity 0.3s ease; }
 .about-overlay:hover { opacity: 0.8; }
 
