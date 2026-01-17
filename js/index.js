@@ -55,6 +55,7 @@
 
   const councilSelect = document.getElementById('councilSelect');
   const communitySelect = document.getElementById('communitySelect');
+  const assetTypeSelect = document.getElementById('assetTypeSelect');
   const clearBtn = document.getElementById('clearBtn');
   const weeksRange = document.getElementById('weeksRange');
   const weeksValue = document.getElementById('weeksValue');
@@ -94,6 +95,183 @@
     hoursEl.textContent = hours.toFixed(1);
     avgEl.textContent = c ? formatNum(gallons / c) : '0';
     weeksValue.textContent = weeks;
+    updateConditionsSummary();
+    updateFeatureDetails();
+  }
+
+  function updateConditionsSummary() {
+    const conditionsSection = document.getElementById('conditions-section');
+    const conditionsSummary = document.getElementById('conditions-summary');
+    
+    if (!conditionsSection || !conditionsSummary) return;
+
+    if (selectedIds.size === 0) {
+      conditionsSection.style.display = 'none';
+      return;
+    }
+
+    const selectedFeatures = features.filter(f => selectedIds.has(f.properties.asset_id));
+    
+    // Calculate average infiltration rate
+    const infilRates = selectedFeatures
+      .map(f => f.properties.effective_infiltration_inhr)
+      .filter(v => v != null && Number.isFinite(v) && v > 0);
+    
+    const avgInfil = infilRates.length > 0 
+      ? infilRates.reduce((sum, v) => sum + v, 0) / infilRates.length
+      : null;
+
+    let html = '';
+    
+    if (selectedIds.size === 1) {
+      html += '<div class="summary-title">Single Asset</div>';
+    } else {
+      html += `<div class="summary-title">${selectedIds.size} Assets Selected</div>`;
+    }
+
+    if (avgInfil != null) {
+      html += `
+        <div class="summary-stat">
+          <span class="stat-label">${selectedIds.size === 1 ? 'Infiltration Rate' : 'Avg Infiltration Rate'}:</span>
+          <span class="stat-value">${avgInfil.toFixed(3)} in/hr</span>
+        </div>
+      `;
+    }
+
+    if (infilRates.length > 0 && infilRates.length < selectedIds.size) {
+      html += `
+        <small class="muted" style="display: block; margin-top: 6px; line-height: 1.4;">
+          ${infilRates.length} of ${selectedIds.size} assets have infiltration data.
+        </small>
+      `;
+    } else if (infilRates.length === 0) {
+      html += '<p class="muted">No infiltration data available for selected assets.</p>';
+    }
+
+    conditionsSummary.innerHTML = html;
+    conditionsSection.style.display = 'block';
+  }
+
+  function updateFeatureDetails() {
+    const featureInfoDiv = document.getElementById('feature-info');
+    if (!featureInfoDiv) return;
+
+    if (selectedIds.size === 0) {
+      featureInfoDiv.innerHTML = '<p class="muted">Select assets on the map to see details</p>';
+      return;
+    }
+
+    const selectedFeatures = features.filter(f => selectedIds.has(f.properties.asset_id));
+    
+    let html = '<div style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">';
+
+    selectedFeatures.forEach(f => {
+      const props = f.properties;
+      html += `
+        <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="color: #0f172a; font-size: 13px;">${props.asset_type || 'Rain Garden'}</strong>
+            <span style="font-size: 11px; color: #6b7280;">ID: ${props.asset_id}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 120px 1fr; row-gap: 6px; column-gap: 10px; font-size: 12px; color: #111827;">
+            ${props.asset_area ? `<div style="color:#6b7280;">Area</div><div>${Math.round(props.asset_area)} sq ft</div>` : ''}
+            ${props.base_capacity_gal ? `<div style="color:#6b7280;">Base Capacity</div><div>${props.base_capacity_gal.toLocaleString()} gal</div>` : ''}
+            ${props.maintenance_hours_per_month ? `<div style="color:#6b7280;">Maintenance</div><div>${props.maintenance_hours_per_month} hrs/mo</div>` : ''}
+            ${props.council_dist ? `<div style="color:#6b7280;">Council District</div><div>${Math.round(props.council_dist)}</div>` : ''}
+            ${props.community_district ? `<div style="color:#6b7280;">Community District</div><div>${props.community_district}</div>` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    featureInfoDiv.innerHTML = html;
+  }
+
+  function updateDistrictSummary(councilDist = null, communityDist = null) {
+    const districtSummarySection = document.getElementById('district-summary-section');
+    const districtSummaryDiv = document.getElementById('district-summary');
+    
+    if (!districtSummarySection || !districtSummaryDiv) return;
+
+    if (!councilDist && !communityDist) {
+      districtSummarySection.style.display = 'none';
+      return;
+    }
+
+    // Filter features by district
+    let districtFeatures = features;
+    let districtName = '';
+    
+    if (councilDist && communityDist) {
+      districtFeatures = features.filter(f => 
+        Math.round(Number(f.properties.council_dist)) === councilDist &&
+        f.properties.community_district === communityDist
+      );
+      districtName = `Council District ${councilDist} / Community District ${communityDist}`;
+    } else if (councilDist) {
+      districtFeatures = features.filter(f => 
+        Math.round(Number(f.properties.council_dist)) === councilDist
+      );
+      districtName = `City Council District ${councilDist}`;
+    } else if (communityDist) {
+      districtFeatures = features.filter(f => 
+        f.properties.community_district === communityDist
+      );
+      districtName = `Community District ${communityDist}`;
+    }
+
+    // Calculate statistics
+    const totalAssets = districtFeatures.length;
+    const totalArea = districtFeatures.reduce((sum, f) => sum + (f.properties.asset_area || 0), 0);
+    const totalCapacity = districtFeatures.reduce((sum, f) => sum + (f.properties.base_capacity_gal || 0), 0);
+    const totalMaintenance = districtFeatures.reduce((sum, f) => sum + (f.properties.maintenance_hours_per_month || 0), 0);
+    
+    // Count by asset type
+    const assetTypes = {};
+    districtFeatures.forEach(f => {
+      const type = f.properties.asset_type || 'Unknown';
+      assetTypes[type] = (assetTypes[type] || 0) + 1;
+    });
+
+    // Build HTML
+    let html = `
+      <div class="summary-title">${districtName}</div>
+      <div class="summary-stat">
+        <span class="stat-label">Total Assets:</span>
+        <span class="stat-value">${totalAssets}</span>
+      </div>
+      <div class="summary-stat">
+        <span class="stat-label">Total Area:</span>
+        <span class="stat-value">${formatNum(totalArea)} sq ft</span>
+      </div>
+      <div class="summary-stat">
+        <span class="stat-label">Total Capacity:</span>
+        <span class="stat-value">${formatNum(totalCapacity)} gal</span>
+      </div>
+      <div class="summary-stat">
+        <span class="stat-label">Total Maintenance:</span>
+        <span class="stat-value">${totalMaintenance.toFixed(1)} hrs/mo</span>
+      </div>
+    `;
+
+    // Add asset type breakdown if there are multiple types
+    if (Object.keys(assetTypes).length > 1) {
+      html += '<div class="asset-type-breakdown">';
+      html += '<div style="font-weight: 700; margin-bottom: 6px; font-size: 12px; color: #555;">Asset Types:</div>';
+      Object.entries(assetTypes).sort((a, b) => b[1] - a[1]).forEach(([type, count]) => {
+        html += `
+          <div class="asset-type-item">
+            <span class="type-name">${type}</span>
+            <span class="type-count">${count}</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+    }
+
+    districtSummaryDiv.innerHTML = html;
+    districtSummarySection.style.display = 'block';
   }
 
   function refreshSelectedLayer() {
@@ -125,14 +303,23 @@
   function populateDropdowns() {
     const councils = new Set();
     const communities = new Set();
+    const assetTypes = new Set();
+    const isRainGardenType = t => t === 'Rain Garden' || (typeof t === 'string' && t.startsWith('ROW'));
+    const labelAssetType = t => {
+      if (t === 'Rain Garden') return 'Rain Garden';
+      if (typeof t === 'string' && t.startsWith('ROW')) return `Street/ROW (curbside) — ${t}`;
+      return t;
+    };
     features.forEach(f => {
       const c = f.properties.council_dist;
       const cm = f.properties.community_dist;
+      const t = f.properties.asset_type;
       if (c != null && Number.isFinite(Number(c))) councils.add(Math.round(Number(c)));
       if (cm != null && Number.isFinite(Number(cm))) {
         const cmNum = Math.round(Number(cm));
         if (cmNum !== 481 && cmNum !== 482) communities.add(cmNum);
       }
+      if (t && isRainGardenType(t)) assetTypes.add(t);
     });
     
     [...councils].sort((a, b) => a - b).forEach(val => {
@@ -148,24 +335,83 @@
       opt.textContent = communityDistrictNames[val] || `Community ${val}`;
       communitySelect.appendChild(opt);
     });
+
+    [...assetTypes].sort().forEach(val => {
+      const opt = document.createElement('option');
+      opt.value = String(val);
+      opt.textContent = labelAssetType(val);
+      assetTypeSelect.appendChild(opt);
+    });
+  }
+
+  function getFilters() {
+    const councilDist = councilSelect.value ? Number(councilSelect.value) : null;
+    const communityDist = communitySelect.value ? Number(communitySelect.value) : null;
+    const assetType = assetTypeSelect.value || null;
+    return { councilDist, communityDist, assetType };
+  }
+
+  function applyFiltersSelection() {
+    const { councilDist, communityDist, assetType } = getFilters();
+    updateDistrictSummary(councilDist, communityDist);
+
+    if (!councilDist && !communityDist && !assetType) return;
+
+    const ids = features
+      .filter(f => {
+        const cMatch = councilDist ? Math.round(Number(f.properties.council_dist)) === councilDist : true;
+        const cmMatch = communityDist ? Math.round(Number(f.properties.community_dist)) === communityDist : true;
+        const tMatch = assetType ? f.properties.asset_type === assetType : true;
+        return cMatch && cmMatch && tMatch;
+      })
+      .map(f => f.properties.asset_id);
+
+    setSelection(ids, getMode());
   }
 
   function ensureDefaults(raw) {
     const props = raw.properties || {};
     const councilNum = props.council_dist != null ? Number(props.council_dist) : (props.city_counc != null ? Number(props.city_counc) : null);
     const communityNum = props.community_dist != null ? Number(props.community_dist) : (props.community_ != null ? Number(props.community_) : null);
-    const baseCap = props.base_capacity_gal != null ? Number(props.base_capacity_gal) : 2500;
-    const maintHrs = props.maintenance_hours_per_month != null ? Number(props.maintenance_hours_per_month) : 3.5;
-    return {
-      ...raw,
-      properties: {
-        asset_id: props.asset_id ?? crypto.randomUUID(),
-        council_dist: councilNum,
-        community_dist: communityNum,
-        maintenance_hours_per_month: maintHrs,
-        base_capacity_gal: baseCap
-      }
+    const gallons2025 = props['2025_gallons_saved'] != null ? Number(props['2025_gallons_saved']) : null;
+    const infilRate = props.effective_infiltration_inhr != null ? Number(props.effective_infiltration_inhr) : null;
+    const area = props.asset_area != null ? Number(props.asset_area) : null;
+    const pondingDepthFt = 0.5; // 6 inches of ponding depth
+
+    let baseCap = 2500;
+    if (Number.isFinite(gallons2025) && gallons2025 > 0) {
+      baseCap = gallons2025;
+    } else if (Number.isFinite(infilRate) && Number.isFinite(area) && infilRate > 0 && area > 0) {
+      // Convert infiltration (in/hr) * area (sq ft) -> gallons per hour
+      const cubicFeetPerHour = area * (infilRate / 12);
+      baseCap = cubicFeetPerHour * 7.48052;
+    } else if (Number.isFinite(area) && area > 0) {
+      // Ponding-only estimate using 6 in depth when infiltration data is missing
+      const cubicFeet = area * pondingDepthFt;
+      baseCap = cubicFeet * 7.48052;
+    } else if (props.base_capacity_gal != null) {
+      baseCap = Number(props.base_capacity_gal);
+    }
+
+    const maintHrs = props.maintenance_hours_per_month != null
+      ? Number(props.maintenance_hours_per_month)
+      : (Number.isFinite(area) && area > 0
+          ? (area <= 1000 ? 3 : 4) // 36 hrs/yr for <=1000 sq ft, 48 hrs/yr for larger
+          : 3.5);
+
+    const nextProps = {
+      ...props,
+      asset_id: props.asset_id ?? crypto.randomUUID(),
+      council_dist: councilNum,
+      community_dist: communityNum,
+      asset_area: area,
+      maintenance_hours_per_month: maintHrs,
+      base_capacity_gal: baseCap,
+      effective_infiltration_inhr: infilRate,
+      gallons_saved_2025: gallons2025
     };
+
+    return { ...raw, properties: nextProps };
   }
 
   function initMapScenario() {
@@ -178,9 +424,14 @@
     });
 
     mapScenario.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    mapScenario.addControl(new mapboxgl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: true,
+      showUserHeading: true
+    }), 'top-right');
 
     mapScenario.on('load', () => {
-      fetch('data/processed/gi-surface-queens.geojson')
+      fetch('data/processed/gi-surface-queens-RG-2025-totals.geojson')
         .then(r => r.json())
         .then(data => {
           features = (data.features || [])
@@ -268,6 +519,24 @@
                 </div>
               `;
             }
+
+            if (props.gallons_saved_2025) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">2025 Gallons Saved:</strong>
+                  <span style="color: #1a1a1a;">${props.gallons_saved_2025.toLocaleString()}</span>
+                </div>
+              `;
+            }
+
+            if (props.effective_infiltration_inhr) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Infiltration Rate:</strong>
+                  <span style="color: #1a1a1a;">${props.effective_infiltration_inhr.toFixed(3)} in/hr</span>
+                </div>
+              `;
+            }
             
             if (props.maintenance_hours_per_month) {
               html += `
@@ -339,26 +608,20 @@
           // Event listeners
           weeksRange.addEventListener('input', updateSummary);
 
-          councilSelect.addEventListener('change', e => {
-            const val = e.target.value;
-            if (!val) return;
-            const num = Number(val);
-            const ids = features.filter(f => Math.round(Number(f.properties.council_dist)) === num).map(f => f.properties.asset_id);
-            setSelection(ids, getMode());
-          });
+          councilSelect.addEventListener('change', applyFiltersSelection);
 
-          communitySelect.addEventListener('change', e => {
-            const val = e.target.value;
-            if (!val) return;
-            const num = Number(val);
-            const ids = features.filter(f => Math.round(Number(f.properties.community_dist)) === num).map(f => f.properties.asset_id);
-            setSelection(ids, getMode());
-          });
+          communitySelect.addEventListener('change', applyFiltersSelection);
+
+          assetTypeSelect.addEventListener('change', applyFiltersSelection);
 
           clearBtn.addEventListener('click', () => {
             selectedIds.clear();
+            councilSelect.value = '';
+            communitySelect.value = '';
+            assetTypeSelect.value = '';
             refreshSelectedLayer();
             updateSummary();
+            updateDistrictSummary(null, null);
           });
         })
         .catch(err => console.error('Failed to load GeoJSON', err));

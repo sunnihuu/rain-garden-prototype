@@ -808,3 +808,59 @@
   background: var(--border-light);
   margin: 4px 0;
 }
+
+/* District Summary Styles */
+.district-summary {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.district-summary .summary-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.district-summary .summary-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.district-summary .summary-stat:last-child {
+  border-bottom: none;
+}
+
+.district-summary .stat-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.district-summary .stat-value {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.district-summary .asset-type-breakdown {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.district-summary .asset-type-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.district-summary .asset-type-item .type-name {
+  color: var(--text-secondary);
+}
+
+.district-summary .asset-type-item .type-count {
+  color: var(--text-primary);
+  font-weight: 600;
+}

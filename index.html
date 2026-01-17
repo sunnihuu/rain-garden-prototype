@@ -442,7 +442,7 @@
       
       <!-- Legend Panel (Lower Left) -->
       <div class="legend-panel" id="asset-legend">
-        <div class="legend-title">Asset Types</div>
+        <div class="legend-title">Selection Status</div>
         <div class="legend-items">
           <div class="legend-row">
             <div class="legend-circle" style="background-color: #0ea5e9; border: 2px solid #0b759e;"></div>
@@ -451,27 +451,6 @@
           <div class="legend-row">
             <div class="legend-circle" style="background-color: #22c55e; border: 2px solid #15803d;"></div>
             <span class="legend-text">Selected</span>
-          </div>
-          <div class="legend-separator"></div>
-          <div class="legend-row">
-            <div class="legend-circle" style="background-color: #17A2B8;"></div>
-            <span class="legend-text">Rain Garden</span>
-          </div>
-          <div class="legend-row">
-            <div class="legend-circle" style="background-color: #2ecc71;"></div>
-            <span class="legend-text">Rain Garden in Street</span>
-          </div>
-          <div class="legend-row">
-            <div class="legend-circle" style="background-color: #FFB366;"></div>
-            <span class="legend-text">Bioswale</span>
-          </div>
-          <div class="legend-row">
-            <div class="legend-circle" style="background-color: #9B59B6;"></div>
-            <span class="legend-text">Green Street</span>
-          </div>
-          <div class="legend-row">
-            <div class="legend-circle" style="background-color: #E85D75;"></div>
-            <span class="legend-text">Stormwater Green Street</span>
           </div>
         </div>
       </div>
@@ -488,17 +467,38 @@
           <select id="councilSelect"><option value="">Select…</option></select>
           <label class="label" for="communitySelect">Community District</label>
           <select id="communitySelect"><option value="">Select…</option></select>
+          <label class="label" for="assetTypeSelect">Asset Type</label>
+          <select id="assetTypeSelect"><option value="">All types…</option></select>
+          <small class="muted" style="line-height: 1.4; display: block; margin-top: 6px;">Asset Type highlights rain-garden styles. “ROW” means right-of-way/curbside installs (street bioswales). Leave “All types…” to include everything.</small>
           <button id="clearBtn" class="btn secondary">Clear selection</button>
+        </section>
+
+        <!-- District Summary Section -->
+        <section class="block" id="district-summary-section" style="display: none;">
+          <h2>District Overview</h2>
+          <div id="district-summary" class="district-summary">
+            <!-- District summary will be populated here -->
+          </div>
+        </section>
+
+        <!-- Environmental Conditions Section -->
+        <section class="block" id="conditions-section" style="display: none;">
+          <h2>Environmental Conditions</h2>
+          <div id="conditions-summary" class="conditions-summary">
+            <!-- Conditions summary will be populated here -->
+          </div>
         </section>
 
         <section class="block">
           <h2>Maintenance Degradation</h2>
-          <label class="label" for="weeksRange">Weeks since last maintained</label>
-          <input id="weeksRange" type="range" min="0" max="8" step="1" value="0" />
-          <div class="row space">
-            <span class="badge"><span id="weeksValue">0</span> weeks</span>
-            <small class="muted">Capacity clamps at 20% by week 8.</small>
+          <label class="label" for="weeksRange">Weeks since last maintenance</label>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <input id="weeksRange" type="range" min="0" max="8" step="1" value="0" style="flex: 1;" />
+            <span class="badge" style="white-space: nowrap;"><span id="weeksValue">0</span> weeks</span>
           </div>
+          <small class="muted" style="display: block; margin-top: 6px; line-height: 1.5;">
+            Each week without maintenance reduces capacity by about 10%. It bottoms out at 20% after 8 weeks.
+          </small>
         </section>
 
         <section class="block">
@@ -509,16 +509,27 @@
             <div><div class="summary-label">Maintenance (hrs/mo)</div><div class="summary-value" id="hours">0</div></div>
             <div><div class="summary-label">Avg Effective Capacity</div><div class="summary-value" id="avg">0</div></div>
           </div>
-          <small class="muted">
-            effective_capacity = base_capacity_gal × (1 - 0.10 × weeks), min 20% of base.
+          <small class="muted" style="line-height: 1.5; display: block; margin-top: 6px;">
+            Effective capacity updates with the slider: <strong>effective = base × (1 - 10% × weeks)</strong>, and never drops below <strong>20% of base</strong>.
           </small>
+        </section>
+
+        <section class="block">
+          <h2>Data &amp; Assumptions</h2>
+          <ul class="muted" style="line-height: 1.5; padding-left: 16px; margin: 0;">
+            <li>Assets from gi-surface-queens-RG-2025-totals.geojson (Queens GI points only).</li>
+            <li>District lookups use NYC City Council and Community District boundaries.</li>
+            <li>Base capacity comes from 2025 gallons saved when provided; otherwise from infiltration rate × area, or a 6-inch ponding depth fallback.</li>
+            <li>Maintenance defaults: ≤1000 sq ft → ~3 hrs/mo; &gt;1000 sq ft → ~4 hrs/mo (unless data provides a value).</li>
+            <li>Degradation: -10% capacity per week without maintenance, clamped at 20% of base.</li>
+          </ul>
         </section>
 
         <!-- Feature Info Section -->
         <section class="block">
-          <h2>Feature Details</h2>
+          <h2>Selected Assets</h2>
           <div id="feature-info" class="feature-info">
-            <p class="muted">Hover over features on the map to see details</p>
+            <p class="muted">Select assets on the map to see details</p>
           </div>
         </section>
       </div>
@@ -559,7 +570,7 @@
       // Add GI surface layer
       map.addSource('gi-surface', {
         type: 'geojson',
-        data: 'data/processed/gi-surface-queens.geojson'
+        data: 'data/processed/gi-surface-queens-RG-2025-totals.geojson'
       });
 
       map.addLayer({
@@ -1399,7 +1410,7 @@
       // Add all layers from the main map
       mapDistrict.addSource('gi-surface', {
         type: 'geojson',
-        data: 'data/processed/gi-surface-queens.geojson'
+        data: 'data/processed/gi-surface-queens-RG-2025-totals.geojson'
       });
 
       mapDistrict.addLayer({
