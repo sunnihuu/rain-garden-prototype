@@ -471,6 +471,9 @@
           <label class="label" for="assetTypeSelect">Asset Type</label>
           <select id="assetTypeSelect"><option value="">All types…</option></select>
           <small class="muted" style="line-height: 1.4; display: block; margin-top: 6px;">Asset Type highlights rain-garden styles. “ROW” means right-of-way/curbside installs (street bioswales). Leave “All types…” to include everything.</small>
+          <label class="label" for="outfallTypeSelect">Outfall Type</label>
+          <select id="outfallTypeSelect"><option value="">All outfall types…</option></select>
+          <small class="muted" style="line-height: 1.4; display: block; margin-top: 6px;">Filter drainage points by outfall type. CSO = Combined Sewer Overflow, MS4 = Municipal Separate Storm Sewer System.</small>
           <button id="clearBtn" class="btn secondary">Clear selection</button>
         </section>
 
@@ -517,7 +520,7 @@
             <div><div class="summary-label">Avg Performance Per Garden</div><div class="summary-value" id="avg">0</div></div>
           </div>
           <small class="muted" style="line-height: 1.5; display: block; margin-top: 6px;">
-            Performance drops as maintenance is delayed: <strong>capacity = base × (1 - 10% × weeks)</strong>, bottoming out at <strong>20% of base</strong>.
+            Performance drops as maintenance is delayed: <strong>capacity = base × (1 - 10% × weeks)</strong>, bottoming out at <strong>20% of base</strong>. Data from gi-surface-queens-RG-2025-totals.geojson.
           </small>
         </section>
 
@@ -1020,6 +1023,39 @@
         map.getCanvas().style.cursor = '';
         drainagePointsPopup.remove();
       });
+
+      // Populate outfall type dropdown
+      fetch('data/processed/drainage points.geojson')
+        .then(response => response.json())
+        .then(data => {
+          const outfallTypes = new Set();
+          data.features.forEach(feature => {
+            if (feature.properties.outfall_ty) {
+              outfallTypes.add(feature.properties.outfall_ty);
+            }
+          });
+          
+          const select = document.getElementById('outfallTypeSelect');
+          if (select) {
+            Array.from(outfallTypes).sort().forEach(type => {
+              const option = document.createElement('option');
+              option.value = type;
+              option.textContent = type;
+              select.appendChild(option);
+            });
+            
+            // Add change event listener
+            select.addEventListener('change', function() {
+              const selectedType = this.value;
+              if (selectedType) {
+                map.setFilter('drainage-points', ['==', ['get', 'outfall_ty'], selectedType]);
+              } else {
+                map.setFilter('drainage-points', null);
+              }
+            });
+          }
+        })
+        .catch(err => console.error('Error loading drainage points for filter:', err));
 
       // Layer management
       const list = document.getElementById('layerList');
