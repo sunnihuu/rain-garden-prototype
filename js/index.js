@@ -780,13 +780,33 @@
 
           assetTypeSelect.addEventListener('change', applyFiltersSelection);
 
+          // Outfall type filter
+          const outfallTypeSelect = document.getElementById('outfallTypeSelect');
+          if (outfallTypeSelect) {
+            outfallTypeSelect.addEventListener('change', function() {
+              const selectedType = this.value;
+              const filter = selectedType ? ['==', ['get', 'outfall_ty'], selectedType] : null;
+              
+              // Apply filter to simulator map drainage-points layer
+              if (mapScenario && mapScenario.getLayer('drainage-points')) {
+                mapScenario.setFilter('drainage-points', filter);
+              }
+            });
+          }
+
           clearBtn.addEventListener('click', () => {
             selectedIds.clear();
             councilSelect.value = '';
             communitySelect.value = '';
             assetTypeSelect.value = '';
             const outfallSelect = document.getElementById('outfallTypeSelect');
-            if (outfallSelect) outfallSelect.value = '';
+            if (outfallSelect) {
+              outfallSelect.value = '';
+              // Clear drainage points filter
+              if (mapScenario && mapScenario.getLayer('drainage-points')) {
+                mapScenario.setFilter('drainage-points', null);
+              }
+            }
             refreshSelectedLayer();
             updateSummary();
             updateDistrictSummary(null, null);

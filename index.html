@@ -471,9 +471,9 @@
           <label class="label" for="assetTypeSelect">Asset Type</label>
           <select id="assetTypeSelect"><option value="">All types…</option></select>
           <small class="muted" style="line-height: 1.4; display: block; margin-top: 6px;">Asset Type highlights rain-garden styles. “ROW” means right-of-way/curbside installs (street bioswales). Leave “All types…” to include everything.</small>
-          <label class="label" for="outfallTypeSelect">Outfall Type</label>
-          <select id="outfallTypeSelect"><option value="">All outfall types…</option></select>
-          <small class="muted" style="line-height: 1.4; display: block; margin-top: 6px;">Filter drainage points by outfall type. CSO = Combined Sewer Overflow, MS4 = Municipal Separate Storm Sewer System.</small>
+          <label class="label" for="outfallTypeSelect">Outfall (e.g., TI-010, BB-006)</label>
+          <select id="outfallTypeSelect"><option value="">All outfalls…</option></select>
+          <small class="muted" style="line-height: 1.4; display: block; margin-top: 6px;">Filter rain gardens by their outfall drainage area (the specific stormwater management zone they drain to).</small>
           <button id="clearBtn" class="btn secondary">Clear selection</button>
         </section>
 
@@ -2014,8 +2014,17 @@
       if (props.asset_area) {
         html += `<div class="feature-property"><strong>Area:</strong> <span>${props.asset_area.toLocaleString()} sq ft</span></div>`;
       }
+      if (props.sewer_type) {
+        html += `<div class="feature-property"><strong>Sewer Type:</strong> <span>${props.sewer_type}</span></div>`;
+      }
       if (props.COMB_OR_SE) {
         html += `<div class="feature-property"><strong>Sewer Type:</strong> <span>${props.COMB_OR_SE}</span></div>`;
+      }
+      if (props.outfall) {
+        html += `<div class="feature-property"><strong>Outfall:</strong> <span>${props.outfall}</span></div>`;
+      }
+      if (props.nyc_waters) {
+        html += `<div class="feature-property"><strong>NYC Waters:</strong> <span>${props.nyc_waters}</span></div>`;
       }
       if (props.MUSYM) {
         html += `<div class="feature-property"><strong>Soil:</strong> <span>${props.MUSYM}</span></div>`;
@@ -2026,11 +2035,8 @@
       if (props.acreage) {
         html += `<div class="feature-property"><strong>Acreage:</strong> <span>${props.acreage.toFixed(2)}</span></div>`;
       }
-      if (props.outfall) {
-        html += `<div class="feature-property"><strong>Outfall:</strong> <span>${props.outfall}</span></div>`;
-      }
       if (props.outfall_ty) {
-        html += `<div class="feature-property"><strong>Type:</strong> <span>${props.outfall_ty}</span></div>`;
+        html += `<div class="feature-property"><strong>Outfall Type:</strong> <span>${props.outfall_ty}</span></div>`;
       }
 
       infoDiv.innerHTML = html;
