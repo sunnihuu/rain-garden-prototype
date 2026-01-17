@@ -502,21 +502,23 @@
     const councilDist = councilSelect.value ? Number(councilSelect.value) : null;
     const communityDist = communitySelect.value ? Number(communitySelect.value) : null;
     const assetType = assetTypeSelect.value || null;
-    return { councilDist, communityDist, assetType };
+    const outfall = document.getElementById('outfallTypeSelect')?.value || null;
+    return { councilDist, communityDist, assetType, outfall };
   }
 
   function applyFiltersSelection() {
-    const { councilDist, communityDist, assetType } = getFilters();
+    const { councilDist, communityDist, assetType, outfall } = getFilters();
     updateDistrictSummary(councilDist, communityDist);
 
-    if (!councilDist && !communityDist && !assetType) return;
+    if (!councilDist && !communityDist && !assetType && !outfall) return;
 
     const ids = features
       .filter(f => {
         const cMatch = councilDist ? Math.round(Number(f.properties.council_dist)) === councilDist : true;
         const cmMatch = communityDist ? Math.round(Number(f.properties.community_dist)) === communityDist : true;
         const tMatch = assetType ? f.properties.asset_type === assetType : true;
-        return cMatch && cmMatch && tMatch;
+        const oMatch = outfall ? f.properties.outfall === outfall : true;
+        return cMatch && cmMatch && tMatch && oMatch;
       })
       .map(f => f.properties.asset_id);
 
