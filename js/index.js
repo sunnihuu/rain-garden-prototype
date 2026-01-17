@@ -81,6 +81,14 @@
     return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0';
   }
 
+  function getInfiltrationQuality(rate) {
+    if (!Number.isFinite(rate) || rate <= 0) return null;
+    if (rate >= 0.5) return { label: 'Excellent', color: '#22c55e', desc: 'Fast drainage — ideal for rain gardens' };
+    if (rate >= 0.3) return { label: 'Good', color: '#84cc16', desc: 'Moderate drainage — performs well' };
+    if (rate >= 0.1) return { label: 'Fair', color: '#f59e0b', desc: 'Slower drainage — may need maintenance' };
+    return { label: 'Poor', color: '#ef4444', desc: 'Very slow drainage — check for clogging' };
+  }
+
   function updateSummary() {
     const weeks = Number(weeksRange.value);
     let c = 0, gallons = 0, hours = 0;
@@ -130,26 +138,37 @@
     }
 
     if (avgInfil != null) {
+      const quality = getInfiltrationQuality(avgInfil);
       html += `
         <div class="summary-stat">
           <span class="stat-label">${selectedIds.size === 1 ? 'Infiltration Rate' : 'Avg Infiltration Rate'}:</span>
           <span class="stat-value">${avgInfil.toFixed(3)} in/hr</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px; background: ${quality.color}15; border-left: 3px solid ${quality.color}; border-radius: 4px;">
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: ${quality.color};"></div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: ${quality.color}; font-size: 13px;">${quality.label} Drainage</div>
+            <div style="font-size: 11px; color: #555; margin-top: 2px;">${quality.desc}</div>
+          </div>
         </div>
       `;
     }
 
     if (infilRates.length > 0 && infilRates.length < selectedIds.size) {
       html += `
-        <small class="muted" style="display: block; margin-top: 6px; line-height: 1.4;">
+        <small class="muted" style="display: block; margin-top: 8px; line-height: 1.4;">
           ${infilRates.length} of ${selectedIds.size} assets have infiltration data.
         </small>
       `;
+      conditionsSummary.innerHTML = html;
+      conditionsSection.style.display = 'block';
     } else if (infilRates.length === 0) {
-      html += '<p class="muted">No infiltration data available for selected assets.</p>';
+      // Hide section entirely if no infiltration data
+      conditionsSection.style.display = 'none';
+    } else {
+      conditionsSummary.innerHTML = html;
+      conditionsSection.style.display = 'block';
     }
-
-    conditionsSummary.innerHTML = html;
-    conditionsSection.style.display = 'block';
   }
 
   function updateFeatureDetails() {
@@ -167,6 +186,7 @@
 
     selectedFeatures.forEach(f => {
       const props = f.properties;
+      const quality = getInfiltrationQuality(props.effective_infiltration_inhr);
       html += `
         <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -180,6 +200,15 @@
             ${props.council_dist ? `<div style="color:#6b7280;">Council District</div><div>${Math.round(props.council_dist)}</div>` : ''}
             ${props.community_district ? `<div style="color:#6b7280;">Community District</div><div>${props.community_district}</div>` : ''}
           </div>
+          ${quality ? `
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 8px; background: ${quality.color}15; border-left: 3px solid ${quality.color}; border-radius: 4px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: ${quality.color}; flex-shrink: 0;"></div>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; color: ${quality.color}; font-size: 11px;">${quality.label} Drainage</div>
+                <div style="font-size: 10px; color: #555; margin-top: 1px;">${props.effective_infiltration_inhr.toFixed(3)} in/hr — ${quality.desc}</div>
+              </div>
+            </div>
+          ` : ''}
         </div>
       `;
     });
@@ -530,12 +559,24 @@
             }
 
             if (props.effective_infiltration_inhr) {
+              const quality = getInfiltrationQuality(props.effective_infiltration_inhr);
               html += `
                 <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
                   <strong style="color: #555;">Infiltration Rate:</strong>
                   <span style="color: #1a1a1a;">${props.effective_infiltration_inhr.toFixed(3)} in/hr</span>
                 </div>
               `;
+              if (quality) {
+                html += `
+                  <div style="display: flex; align-items: center; gap: 6px; padding: 8px; margin-top: 4px; background: ${quality.color}15; border-left: 3px solid ${quality.color}; border-radius: 4px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: ${quality.color}; flex-shrink: 0;"></div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: ${quality.color}; font-size: 12px;">${quality.label} Drainage</div>
+                      <div style="font-size: 11px; color: #555; margin-top: 2px;">${quality.desc}</div>
+                    </div>
+                  </div>
+                `;
+              }
             }
             
             if (props.maintenance_hours_per_month) {

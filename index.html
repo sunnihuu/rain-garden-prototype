@@ -481,36 +481,36 @@
           </div>
         </section>
 
-        <!-- Environmental Conditions Section -->
+        <!-- Asset Conditions Section -->
         <section class="block" id="conditions-section" style="display: none;">
-          <h2>Environmental Conditions</h2>
+          <h2>Asset Conditions</h2>
           <div id="conditions-summary" class="conditions-summary">
             <!-- Conditions summary will be populated here -->
           </div>
         </section>
 
         <section class="block">
-          <h2>Maintenance Degradation</h2>
-          <label class="label" for="weeksRange">Weeks since last maintenance</label>
+          <h2>Weeks Without Action</h2>
+          <label class="label" for="weeksRange">If maintenance is delayed this many weeks</label>
           <div style="display: flex; align-items: center; gap: 12px;">
             <input id="weeksRange" type="range" min="0" max="8" step="1" value="0" style="flex: 1;" />
             <span class="badge" style="white-space: nowrap;"><span id="weeksValue">0</span> weeks</span>
           </div>
           <small class="muted" style="display: block; margin-top: 6px; line-height: 1.5;">
-            Each week without maintenance reduces capacity by about 10%. It bottoms out at 20% after 8 weeks.
+            If maintenance is delayed, performance drops ~10% per week. After 8 weeks, capacity bottoms out at just 20% of potential.
           </small>
         </section>
 
         <section class="block">
-          <h2>Summary</h2>
+          <h2>If These Gardens Were Maintained…</h2>
           <div class="summary">
             <div><div class="summary-label">Gardens Selected</div><div class="summary-value" id="count">0</div></div>
-            <div><div class="summary-label">Water Diverted (gal)</div><div class="summary-value" id="gallons">0</div></div>
-            <div><div class="summary-label">Maintenance (hrs/mo)</div><div class="summary-value" id="hours">0</div></div>
-            <div><div class="summary-label">Avg Effective Capacity</div><div class="summary-value" id="avg">0</div></div>
+            <div><div class="summary-label">Stormwater Diverted (gal)</div><div class="summary-value" id="gallons">0</div></div>
+            <div><div class="summary-label">Maintenance Needed (hrs/mo)</div><div class="summary-value" id="hours">0</div></div>
+            <div><div class="summary-label">Avg Performance Per Garden</div><div class="summary-value" id="avg">0</div></div>
           </div>
           <small class="muted" style="line-height: 1.5; display: block; margin-top: 6px;">
-            Effective capacity updates with the slider: <strong>effective = base × (1 - 10% × weeks)</strong>, and never drops below <strong>20% of base</strong>.
+            Performance drops as maintenance is delayed: <strong>capacity = base × (1 - 10% × weeks)</strong>, bottoming out at <strong>20% of base</strong>.
           </small>
         </section>
 
@@ -521,7 +521,7 @@
             <li>District lookups use NYC City Council and Community District boundaries.</li>
             <li>Base capacity comes from 2025 gallons saved when provided; otherwise from infiltration rate × area, or a 6-inch ponding depth fallback.</li>
             <li>Maintenance defaults: ≤1000 sq ft → ~3 hrs/mo; &gt;1000 sq ft → ~4 hrs/mo (unless data provides a value).</li>
-            <li>Degradation: -10% capacity per week without maintenance, clamped at 20% of base.</li>
+            <li>Performance loss: If maintenance is delayed, capacity drops -10% per week, clamped at 20% of base.</li>
           </ul>
         </section>
 
