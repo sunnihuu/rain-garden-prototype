@@ -178,13 +178,34 @@
     
     const lostCapacity = baseCapacity - gallons;
     
+    // Human-scale translation
+    function translateGallons(gal) {
+      if (gal >= 10000) {
+        return 'This can ease pressure on streets, basements, and ground-floor apartments across the neighborhood during heavy rain.';
+      } else if (gal >= 1000) {
+        return 'This can ease pressure on nearby basements and ground-floor apartments during heavy rain.';
+      } else if (gal >= 100) {
+        return 'This can help reduce localized flooding during heavy rain.';
+      } else {
+        return 'Every bit helps reduce strain on the drainage system.';
+      }
+    }
+    
     if (weeks === 0) {
       textEl.textContent = 'If you maintained these rain gardens this week, you would divert:';
-      valueEl.innerHTML = `${formatNum(gallons)} gallons of stormwater`;
+      valueEl.innerHTML = `
+        <div>${formatNum(gallons)} gallons of stormwater</div>
+        <div style="font-size: 13px; font-weight: 400; margin-top: 8px; line-height: 1.5; color: rgba(255,255,255,0.95);">
+          ${translateGallons(gallons)}
+        </div>
+      `;
     } else {
       textEl.textContent = `If maintenance were delayed ${weeks} week${weeks > 1 ? 's' : ''}, diverted water drops to:`;
       valueEl.innerHTML = `
         <div>${formatNum(gallons)} gallons of stormwater</div>
+        <div style="font-size: 13px; font-weight: 400; margin-top: 8px; line-height: 1.5; color: rgba(255,255,255,0.95);">
+          ${translateGallons(gallons)}
+        </div>
         <div style="font-size: 16px; font-weight: 600; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.3); color: #fcd34d;">
           Water lost due to delayed maintenance:<br>
           <span style="font-size: 22px; font-weight: 700;">${formatNum(lostCapacity)} gallons</span>
