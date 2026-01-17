@@ -493,3 +493,259 @@
   font-weight: 600;
   letter-spacing: 0.5px;
 }
+
+/* Info Modal Styles */
+.info-modal {
+  display: none !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.info-modal.active {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-modal .modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.info-modal .modal-content {
+  position: relative;
+  z-index: 1001;
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 2px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.info-modal .modal-header h2 {
+  font-family: "League Spartan", sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.info-modal .modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.info-modal .modal-close:hover {
+  color: var(--text-primary);
+}
+
+.info-modal .modal-body {
+  padding: 24px;
+}
+
+.info-modal .block {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-modal .block:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.info-modal .block h2 {
+  font-family: "League Spartan", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-modal .row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.info-modal .row.space {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-modal .radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.info-modal .radio input[type="radio"] {
+  cursor: pointer;
+}
+
+.info-modal .radio span {
+  cursor: pointer;
+}
+
+.info-modal .label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 12px 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-modal select,
+.info-modal input[type="range"],
+.info-modal input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.info-modal select {
+  cursor: pointer;
+}
+
+.info-modal input[type="range"] {
+  padding: 0;
+  height: 6px;
+  margin-bottom: 12px;
+}
+
+.info-modal .btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+}
+
+.info-modal .btn.secondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.info-modal .btn:hover {
+  opacity: 0.9;
+}
+
+.info-modal .badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.info-modal .muted {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.info-modal .summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.info-modal .summary > div {
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.info-modal .summary-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.info-modal .summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.info-modal .feature-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.info-modal .feature-property {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-modal .feature-property:last-child {
+  border-bottom: none;
+}

@@ -219,10 +219,118 @@
             }
           });
 
+          // Create popup for detailed information
+          const assetPopup = new mapboxgl.Popup({
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: '350px'
+          });
+
           mapScenario.on('click', 'gardens-base', e => {
             const f = e.features?.[0];
             if (!f) return;
-            toggleSelection(f.properties.asset_id);
+            
+            const props = f.properties;
+            const coords = f.geometry.coordinates;
+            
+            // Build detailed info HTML
+            let html = `
+              <div style="font-family: 'League Spartan', sans-serif;">
+                <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 700; color: #1a1a1a;">
+                  ${props.asset_type || 'Rain Garden'}
+                </h3>
+                <div style="display: grid; gap: 8px; font-size: 13px;">
+            `;
+            
+            if (props.asset_id) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Asset ID:</strong>
+                  <span style="color: #1a1a1a;">${props.asset_id}</span>
+                </div>
+              `;
+            }
+            
+            if (props.asset_area) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Area:</strong>
+                  <span style="color: #1a1a1a;">${Math.round(props.asset_area)} sq ft</span>
+                </div>
+              `;
+            }
+            
+            if (props.base_capacity_gal) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Base Capacity:</strong>
+                  <span style="color: #1a1a1a;">${props.base_capacity_gal.toLocaleString()} gal</span>
+                </div>
+              `;
+            }
+            
+            if (props.maintenance_hours_per_month) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Maintenance:</strong>
+                  <span style="color: #1a1a1a;">${props.maintenance_hours_per_month} hrs/mo</span>
+                </div>
+              `;
+            }
+            
+            if (props.council_dist) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Council District:</strong>
+                  <span style="color: #1a1a1a;">${Math.round(props.council_dist)}</span>
+                </div>
+              `;
+            }
+            
+            if (props.community_district) {
+              html += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                  <strong style="color: #555;">Community District:</strong>
+                  <span style="color: #1a1a1a;">${props.community_district}</span>
+                </div>
+              `;
+            }
+            
+            html += `
+                </div>
+                <button id="select-asset-${props.asset_id}" 
+                  style="width: 100%; margin-top: 12px; padding: 8px; background: #0ea5e9; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 13px;"
+                  onmouseover="this.style.background='#0284c7'" 
+                  onmouseout="this.style.background='#0ea5e9'">
+                  ${selectedIds.has(props.asset_id) ? '✓ Selected' : 'Select This Garden'}
+                </button>
+              </div>
+            `;
+            
+            assetPopup
+              .setLngLat(coords)
+              .setHTML(html)
+              .addTo(mapScenario);
+            
+            // Add event listener for the select button after popup is added
+            setTimeout(() => {
+              const btn = document.getElementById(`select-asset-${props.asset_id}`);
+              if (btn) {
+                btn.addEventListener('click', () => {
+                  toggleSelection(props.asset_id);
+                  assetPopup.remove();
+                });
+              }
+            }, 0);
+          });
+
+          // Change cursor on hover
+          mapScenario.on('mouseenter', 'gardens-base', () => {
+            mapScenario.getCanvas().style.cursor = 'pointer';
+          });
+
+          mapScenario.on('mouseleave', 'gardens-base', () => {
+            mapScenario.getCanvas().style.cursor = '';
           });
 
           populateDropdowns();
