@@ -132,23 +132,23 @@
     const lossPercent = baseCapacity > 0 ? ((baseCapacity - gallons) / baseCapacity * 100) : 0;
     
     if (weeks === 0) {
-      insights.push('• <strong>Routine maintenance maximizes performance.</strong> These gardens are operating at full capacity.');
+      insights.push('<strong>Routine maintenance maximizes performance.</strong> These gardens are operating at full capacity.');
       if (count >= 10) {
-        insights.push('• <strong>Small, distributed actions compound at scale.</strong> Maintaining ' + count + ' gardens has significant collective impact.');
+        insights.push('<strong>Small, distributed actions compound at scale.</strong> Maintaining ' + count + ' gardens has significant collective impact.');
       }
     } else if (weeks <= 2) {
-      insights.push(`• <strong>Early delays are recoverable.</strong> Performance has dropped ${lossPercent.toFixed(0)}%, but a quick response prevents deeper degradation.`);
+      insights.push(`<strong>Early delays are recoverable.</strong> Performance has dropped ${lossPercent.toFixed(0)}%, but a quick response prevents deeper degradation.`);
     } else if (weeks <= 5) {
-      insights.push(`• <strong>Delayed maintenance cuts performance significantly.</strong> These gardens have lost ${lossPercent.toFixed(0)}% of their capacity.`);
-      insights.push('• <strong>Routine maintenance has a larger impact than adding new gardens.</strong> Preserving existing infrastructure is key.');
+      insights.push(`<strong>Delayed maintenance cuts performance significantly.</strong> These gardens have lost ${lossPercent.toFixed(0)}% of their capacity.`);
+      insights.push('<strong>Routine maintenance has a larger impact than adding new gardens.</strong> Preserving existing infrastructure is key.');
     } else {
-      insights.push(`• <strong>Delayed maintenance cuts performance by up to ${lossPercent.toFixed(0)}%.</strong> At this stage, gardens operate at minimum capacity.`);
-      insights.push('• <strong>Long delays require intervention, not just routine care.</strong> Restoration may be needed before normal performance resumes.');
+      insights.push(`<strong>Delayed maintenance cuts performance by up to ${lossPercent.toFixed(0)}%.</strong> At this stage, gardens operate at minimum capacity.`);
+      insights.push('<strong>Long delays require intervention, not just routine care.</strong> Restoration may be needed before normal performance resumes.');
     }
     
     // Add district-scale insight if many gardens selected
     if (count >= 50) {
-      insights.push('• <strong>This selection shows district-scale potential.</strong> Coordinated maintenance across neighborhoods amplifies individual efforts.');
+      insights.push('<strong>This selection shows district-scale potential.</strong> Coordinated maintenance across neighborhoods amplifies individual efforts.');
     }
     
     content.innerHTML = '<ul style="margin: 0; padding-left: 18px;">' + 
