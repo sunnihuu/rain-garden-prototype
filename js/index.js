@@ -103,8 +103,96 @@
     hoursEl.textContent = hours.toFixed(1);
     avgEl.textContent = c ? formatNum(gallons / c) : '0';
     weeksValue.textContent = weeks;
+    updateImpactMessage(weeks, gallons, c);
     updateConditionsSummary();
+    updateInsights(weeks, gallons, c);
     updateFeatureDetails();
+  }
+
+  function updateInsights(weeks, gallons, count) {
+    const section = document.getElementById('insights-section');
+    const content = document.getElementById('insights-content');
+    
+    if (!section || !content) return;
+    
+    if (count === 0) {
+      section.style.display = 'none';
+      return;
+    }
+    
+    const insights = [];
+    
+    // Calculate base capacity for comparison
+    let baseCapacity = 0;
+    features.forEach(f => {
+      if (!selectedIds.has(f.properties.asset_id)) return;
+      baseCapacity += f.properties.base_capacity_gal;
+    });
+    
+    const lossPercent = baseCapacity > 0 ? ((baseCapacity - gallons) / baseCapacity * 100) : 0;
+    
+    if (weeks === 0) {
+      insights.push('• <strong>Routine maintenance maximizes performance.</strong> These gardens are operating at full capacity.');
+      if (count >= 10) {
+        insights.push('• <strong>Small, distributed actions compound at scale.</strong> Maintaining ' + count + ' gardens has significant collective impact.');
+      }
+    } else if (weeks <= 2) {
+      insights.push(`• <strong>Early delays are recoverable.</strong> Performance has dropped ${lossPercent.toFixed(0)}%, but a quick response prevents deeper degradation.`);
+    } else if (weeks <= 5) {
+      insights.push(`• <strong>Delayed maintenance cuts performance significantly.</strong> These gardens have lost ${lossPercent.toFixed(0)}% of their capacity.`);
+      insights.push('• <strong>Routine maintenance has a larger impact than adding new gardens.</strong> Preserving existing infrastructure is key.');
+    } else {
+      insights.push(`• <strong>Delayed maintenance cuts performance by up to ${lossPercent.toFixed(0)}%.</strong> At this stage, gardens operate at minimum capacity.`);
+      insights.push('• <strong>Long delays require intervention, not just routine care.</strong> Restoration may be needed before normal performance resumes.');
+    }
+    
+    // Add district-scale insight if many gardens selected
+    if (count >= 50) {
+      insights.push('• <strong>This selection shows district-scale potential.</strong> Coordinated maintenance across neighborhoods amplifies individual efforts.');
+    }
+    
+    content.innerHTML = '<ul style="margin: 0; padding-left: 18px;">' + 
+      insights.map(i => `<li style="margin-bottom: 8px;">${i}</li>`).join('') + 
+      '</ul>';
+    section.style.display = 'block';
+  }
+
+  function updateImpactMessage(weeks, gallons, count) {
+    const section = document.getElementById('impact-message-section');
+    const textEl = document.getElementById('impact-message-text');
+    const valueEl = document.getElementById('impact-message-value');
+    
+    if (!section || !textEl || !valueEl) return;
+    
+    if (count === 0) {
+      section.style.display = 'none';
+      return;
+    }
+    
+    // Calculate base capacity (week 0) for loss comparison
+    let baseCapacity = 0;
+    features.forEach(f => {
+      if (!selectedIds.has(f.properties.asset_id)) return;
+      baseCapacity += f.properties.base_capacity_gal;
+    });
+    
+    const lostCapacity = baseCapacity - gallons;
+    
+    if (weeks === 0) {
+      textEl.textContent = 'If you maintained these rain gardens this week, you would divert:';
+      valueEl.innerHTML = `${formatNum(gallons)} gallons of stormwater`;
+    } else {
+      textEl.textContent = `If maintenance were delayed ${weeks} week${weeks > 1 ? 's' : ''}, diverted water drops to:`;
+      valueEl.innerHTML = `
+        <div>${formatNum(gallons)} gallons of stormwater</div>
+        <div style="font-size: 16px; font-weight: 600; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.3); color: #fcd34d;">
+          Water lost due to delayed maintenance:<br>
+          <span style="font-size: 22px; font-weight: 700;">${formatNum(lostCapacity)} gallons</span>
+        </div>
+      `;
+    }
+    
+    section.style.display = 'block';
   }
 
   function updateConditionsSummary() {
@@ -245,7 +333,7 @@
       districtName = `City Council District ${councilDist}`;
     } else if (communityDist) {
       districtFeatures = features.filter(f => 
-        f.properties.community_district === communityDist
+        Math.round(Number(f.properties.community_dist)) === communityDist
       );
       districtName = `Community District ${communityDist}`;
     }
@@ -266,6 +354,22 @@
     // Build HTML
     let html = `
       <div class="summary-title">${districtName}</div>
+    `;
+    
+    // Add collective framing
+    const districtNum = councilDist || communityDist;
+    const districtType = councilDist ? 'District' : 'Community District';
+    html += `
+      <div style="background: #f0f9ff; border-left: 3px solid #0ea5e9; padding: 12px; margin: 12px 0; border-radius: 4px;">
+        <div style="font-weight: 600; font-size: 13px; color: #0369a1; margin-bottom: 4px;">Collective Potential</div>
+        <div style="font-size: 12px; color: #0c4a6e; line-height: 1.5;">
+          If every rain garden in ${districtType} ${districtNum} were maintained this week:<br>
+          <strong style="font-size: 14px; color: #0284c7;">≈ ${formatNum(totalCapacity)} gallons</strong> could be diverted per storm
+        </div>
+      </div>
+    `;
+    
+    html += `
       <div class="summary-stat">
         <span class="stat-label">Total Assets:</span>
         <span class="stat-value">${totalAssets}</span>
