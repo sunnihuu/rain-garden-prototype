@@ -6,3 +6,6 @@ data/original/
 *.shx
 *.prj
 *.cpg
+
+# Ignore raw GIS data
+data/original/
