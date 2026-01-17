@@ -6,9 +6,6 @@
   <title>Flushing GI Scenario Analysis</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
   <link href="css/index.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.18.0/mapbox-gl.js"></script>
@@ -24,11 +21,59 @@
       <div class="landing-buttons">
         <button class="landing-btn" onclick="document.getElementById('screen-combined-map').scrollIntoView({behavior: 'smooth'})">Environmental Context</button>
         <button class="landing-btn" onclick="document.getElementById('screen-scenario').scrollIntoView({behavior: 'smooth'})">Maintenance Impact Simulator</button>
-        <button class="landing-btn">About</button>
+        <button class="landing-btn" onclick="document.getElementById('about-modal').style.display='flex'">About</button>
       </div>
     </section>
 
-    <!-- Screen 2: Combined Map with Layer Controls -->
+    <!-- About Modal -->
+    <div id="about-modal" class="about-modal">
+      <div class="about-modal-content">
+        <button class="about-modal-close" onclick="document.getElementById('about-modal').style.display='none'">&times;</button>
+        <div class="about-modal-container">
+          <!-- Left Column -->
+          <div class="about-column about-left">
+            <h2>About the Project</h2>
+            <p>Rain gardens are small pieces of climate infrastructure but their impact depends on care.</p>
+            <p>This project explores how street-level rain gardens across Queens help capture stormwater and reduce pressure on the sewer system and how their performance changes when routine maintenance is delayed.</p>
+            <p>By combining environmental context with a simple maintenance simulation, the tool allows users to:</p>
+            <ul>
+              <li>see where rain gardens are located,</li>
+              <li>understand the conditions they operate in,</li>
+              <li>and explore how different maintenance scenarios affect stormwater capture at the neighborhood and district scale.</li>
+            </ul>
+            <p>The goal is not to predict exact outcomes, but to make the role of maintenance visible, comparable, and actionable for communities and decision-makers.</p>
+          </div>
+          
+          <!-- Right Column -->
+          <div class="about-column about-right">
+            <h3>Data Sources</h3>
+            
+            <h4>Primary Infrastructure</h4>
+            <p><strong>NYC Green Infrastructure (Rain Gardens)</strong><br>
+            Location, asset ID, City Council District, Community District, and maintenance estimates</p>
+            
+            <h4>Administrative Boundaries</h4>
+            <ul>
+              <li>NYC City Council Districts</li>
+              <li>NYC Community Districts</li>
+            </ul>
+            
+            <h4>Environmental Context Layers</h4>
+            <ul>
+              <li>Soil classification (infiltration potential)</li>
+              <li>Surface slope / elevation-derived slope</li>
+            </ul>
+            
+            <h4>Model Parameters</h4>
+            <ul>
+              <li>Base rain garden capacity: 2,500 gallons (RAIN Coalition)</li>
+              <li>Maintenance effort: approximately 3 to 4 hours per month per asset (RAIN Coalition)</li>
+              <li>Performance degradation: 10% capacity loss per week without maintenance, capped at 20% minimum performance</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
     <section class="screen" id="screen-combined-map">
       <div id="map" class="map-container"></div>
       
