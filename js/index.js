@@ -780,16 +780,16 @@
 
           assetTypeSelect.addEventListener('change', applyFiltersSelection);
 
-          // Outfall type filter
+          // Outfall filter
           const outfallTypeSelect = document.getElementById('outfallTypeSelect');
           if (outfallTypeSelect) {
             outfallTypeSelect.addEventListener('change', function() {
-              const selectedType = this.value;
-              const filter = selectedType ? ['==', ['get', 'outfall_ty'], selectedType] : null;
+              const selectedOutfall = this.value;
+              const filter = selectedOutfall ? ['==', ['get', 'outfall'], selectedOutfall] : null;
               
-              // Apply filter to simulator map drainage-points layer
-              if (mapScenario && mapScenario.getLayer('drainage-points')) {
-                mapScenario.setFilter('drainage-points', filter);
+              // Apply filter to simulator map gi-surface-dots layer
+              if (mapScenario && mapScenario.getLayer('gi-surface-dots')) {
+                mapScenario.setFilter('gi-surface-dots', filter);
               }
             });
           }
@@ -802,9 +802,9 @@
             const outfallSelect = document.getElementById('outfallTypeSelect');
             if (outfallSelect) {
               outfallSelect.value = '';
-              // Clear drainage points filter
-              if (mapScenario && mapScenario.getLayer('drainage-points')) {
-                mapScenario.setFilter('drainage-points', null);
+              // Clear GI surface filter
+              if (mapScenario && mapScenario.getLayer('gi-surface-dots')) {
+                mapScenario.setFilter('gi-surface-dots', null);
               }
             }
             refreshSelectedLayer();

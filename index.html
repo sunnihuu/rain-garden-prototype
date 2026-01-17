@@ -1024,40 +1024,40 @@
         drainagePointsPopup.remove();
       });
 
-      // Populate outfall type dropdown
+      // Populate outfall dropdown
       const outfallTypeSelect = document.getElementById('outfallTypeSelect');
-      fetch('data/processed/drainage points.geojson')
+      fetch('data/processed/gi-surface-queens-RG-2025-totals.geojson')
         .then(response => response.json())
         .then(data => {
-          const outfallTypes = new Set();
+          const outfalls = new Set();
           data.features.forEach(feature => {
-            if (feature.properties.outfall_ty) {
-              outfallTypes.add(feature.properties.outfall_ty);
+            if (feature.properties.outfall) {
+              outfalls.add(feature.properties.outfall);
             }
           });
           
           if (outfallTypeSelect) {
-            Array.from(outfallTypes).sort().forEach(type => {
+            Array.from(outfalls).sort().forEach(outfallId => {
               const option = document.createElement('option');
-              option.value = type;
-              option.textContent = type;
+              option.value = outfallId;
+              option.textContent = outfallId;
               outfallTypeSelect.appendChild(option);
             });
             
             // Add change event listener - will be activated when maps are loaded
             outfallTypeSelect.addEventListener('change', function() {
-              const selectedType = this.value;
-              const filter = selectedType ? ['==', ['get', 'outfall_ty'], selectedType] : null;
+              const selectedOutfall = this.value;
+              const filter = selectedOutfall ? ['==', ['get', 'outfall'], selectedOutfall] : null;
               
-              // Apply filter to both maps if drainage-points layer exists
-              if (map && map.getLayer('drainage-points')) {
-                map.setFilter('drainage-points', filter);
+              // Apply filter to both maps if gi-surface-dots layer exists
+              if (map && map.getLayer('gi-surface-dots')) {
+                map.setFilter('gi-surface-dots', filter);
               }
               // Note: mapScenario filter will be handled in js/index.js when the simulator map loads
             });
           }
         })
-        .catch(err => console.error('Error loading drainage points for filter:', err));
+        .catch(err => console.error('Error loading GI surface data for filter:', err));
 
       // Layer management
       const list = document.getElementById('layerList');
